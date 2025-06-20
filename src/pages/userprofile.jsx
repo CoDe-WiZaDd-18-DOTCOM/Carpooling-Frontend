@@ -1,0 +1,193 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+function UserProfile() {
+  const [user, setUser] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [form, setForm] = useState({});
+
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/users/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+        },
+      });
+      setUser(res.data);
+      setForm(res.data);
+    } catch (err) {
+      console.error("Error fetching profile", err);
+    }
+  };
+
+  const handleChange = (field, value) => {
+    setForm({ ...form, [field]: value });
+  };
+
+  const handlePreferenceChange = (field, value) => {
+    setForm({
+      ...form,
+      preferences: {
+        ...form.preferences,
+        [field]: value,
+      },
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      await axios.put("http://localhost:5001/users/me", form, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+        },
+      });
+      setEditMode(false);
+      fetchUser();
+    } catch (err) {
+      console.error("Error updating profile", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  if (!user) return <div className="text-center mt-10">Loading...</div>;
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 mt-12 bg-white shadow-lg rounded-xl">
+        
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-emerald-600">My Profile</h2>
+        <button
+            onClick={() => window.location.href = "/dashboard"}
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:from-emerald-600 hover:to-emerald-700 transition"
+        >
+            Back to Dashboard
+        </button>
+        </div>
+
+
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="text-gray-600 font-medium">First Name</label>
+            <input
+              type="text"
+              value={form.firstName}
+              disabled={!editMode}
+              onChange={(e) => handleChange("firstName", e.target.value)}
+              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 ${
+                editMode ? "focus:ring-emerald-500" : "bg-gray-100"
+              }`}
+            />
+          </div>
+          <div>
+            <label className="text-gray-600 font-medium">Last Name</label>
+            <input
+              type="text"
+              value={form.lastName}
+              disabled={!editMode}
+              onChange={(e) => handleChange("lastName", e.target.value)}
+              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 ${
+                editMode ? "focus:ring-emerald-500" : "bg-gray-100"
+              }`}
+            />
+          </div>
+          <div>
+            <label className="text-gray-600 font-medium">Email</label>
+            <input
+              type="email"
+              value={form.email}
+              disabled
+              className="w-full mt-1 p-3 border rounded-lg bg-gray-100"
+            />
+          </div>
+          <div>
+            <label className="text-gray-600 font-medium">Phone</label>
+            <input
+              type="tel"
+              value={form.phoneNumber}
+              disabled={!editMode}
+              onChange={(e) => handleChange("phoneNumber", e.target.value)}
+              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 ${
+                editMode ? "focus:ring-emerald-500" : "bg-gray-100"
+              }`}
+            />
+          </div>
+        </div>
+
+        <h3 className="text-xl font-semibold text-emerald-600 mt-6 mb-2">
+          Preferences
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {["music", "smoking", "petFriendly", "ac"].map((field) => (
+            <div key={field}>
+              <label className="text-gray-600 capitalize">{field}</label>
+              <select
+                value={form.preferences?.[field] || "NONE"}
+                onChange={(e) => handlePreferenceChange(field, e.target.value)}
+                disabled={!editMode}
+                className={`w-full mt-1 p-3 border rounded-lg ${
+                  editMode ? "focus:ring-emerald-500" : "bg-gray-100"
+                }`}
+              >
+                <option value="NONE">None</option>
+                <option value="YES">Yes</option>
+                <option value="NO">No</option>
+              </select>
+            </div>
+          ))}
+          <div>
+            <label className="text-gray-600">Gender Preference</label>
+            <select
+              value={form.preferences?.genderBased || "NONE"}
+              onChange={(e) =>
+                handlePreferenceChange("genderBased", e.target.value)
+              }
+              disabled={!editMode}
+              className={`w-full mt-1 p-3 border rounded-lg ${
+                editMode ? "focus:ring-emerald-500" : "bg-gray-100"
+              }`}
+            >
+              <option value="NONE">None</option>
+              <option value="MALE_ONLY">Male Only</option>
+              <option value="FEMALE_ONLY">Female Only</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="text-center mt-6">
+          {!editMode ? (
+            <button
+              onClick={() => setEditMode(true)}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium shadow-md"
+            >
+              Edit Profile
+            </button>
+          ) : (
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={handleSave}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium shadow-md"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={() => {
+                  setEditMode(false);
+                  setForm(user);
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default UserProfile;
