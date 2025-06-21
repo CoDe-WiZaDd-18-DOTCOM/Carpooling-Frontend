@@ -16,6 +16,7 @@ import UserProfile from "./pages/userprofile";
 import BookingDetails from "./pages/bookingdetails";
 import DriverRides from "./pages/driverrides";
 import RideDetails from "./pages/ridedetails";
+import SosAlerts from "./pages/sosalerts";
 
 export const AuthContext = createContext();
 function App() {
@@ -43,6 +44,7 @@ function App() {
         <Route path="/my-bookings/:id" element={<BookingDetails />} />
         <Route path="/ride-details/:id" element={<RideDetails />} />
         <Route path="/driver-rides" element={<DriverRides />} />
+        <Route path="/alerts" element={<SosAlerts />} />
       </Routes>
     </Router>
     </MantineProvider>

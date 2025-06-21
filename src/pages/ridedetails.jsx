@@ -71,11 +71,25 @@ function RideDetails() {
                 key={bookingId}
                 className="bg-white p-4 rounded-lg shadow border"
               >
-                <h4 className="text-lg font-semibold text-gray-800">
-                  Rider: {rider.firstName} {rider.lastName}
-                </h4>
-                <p className="text-sm text-gray-600">Email: {rider.email}</p>
-                <p className="text-sm text-gray-600">Phone: {rider.phoneNumber}</p>
+                <div className="flex items-center gap-4 mb-2">
+                  {rider.profileImageBase64 && (
+                    <img
+                      src={`data:image/jpeg;base64,${rider.profileImageBase64}`}
+                      alt="Rider"
+                      className={`w-12 h-12 rounded-full object-cover border ${
+                        bookingRequest.approved ? "" : "blur-sm"
+                      }`}
+                    />
+                  )}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      {rider.firstName} {rider.lastName}
+                    </h4>
+                    <p className="text-sm text-gray-600">Email: {rider.email}</p>
+                    <p className="text-sm text-gray-600">Phone: {rider.phoneNumber}</p>
+                  </div>
+                </div>
+
                 <p className={`text-sm font-medium mt-2 ${statusClass}`}>
                   Status: {statusText}
                 </p>

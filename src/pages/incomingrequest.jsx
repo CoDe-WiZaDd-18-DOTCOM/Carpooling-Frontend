@@ -3,6 +3,7 @@ import axios from "axios";
 
 function IncomingRequests() {
   const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -12,9 +13,11 @@ function IncomingRequests() {
             Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
           },
         });
-        setRequests(res.data); // Array of BookingWrapper objects
+        setRequests(res.data);
       } catch (err) {
         console.error("Failed to fetch requests:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -28,65 +31,76 @@ function IncomingRequests() {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
       });
-      alert("Request approved!");
-      // Refresh list
+      alert("✅ Request approved!");
       setRequests((prev) =>
         prev.map((req) =>
-          req.id === bookingId ? { ...req, bookingRequest: { ...req.bookingRequest, approved: true } } : req
+          req.id === bookingId
+            ? { ...req, bookingRequest: { ...req.bookingRequest, approved: true } }
+            : req
         )
       );
     } catch (err) {
       console.error("Error approving request:", err);
-      alert("Failed to approve the request.");
+      alert("❌ Failed to approve the request.");
     }
   };
 
+  if (loading)
+    return <div className="text-center text-gray-500 mt-10">Loading incoming requests...</div>;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4 md:px-12">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Incoming Ride Requests</h2>
+    <div className="min-h-screen bg-gray-50 py-10 px-6 md:px-16">
+      <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">Incoming Ride Requests</h2>
 
       {requests.length === 0 ? (
-        <p className="text-center text-gray-600">No incoming ride requests.</p>
+        <div className="text-center text-gray-600">No incoming ride requests.</div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid gap-6">
           {requests.map(({ id, bookingRequest }) => (
             <div
               key={id}
-              className="bg-white shadow-md rounded-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center"
+              className="bg-white shadow-lg hover:shadow-xl rounded-xl p-6 border-l-4 border-emerald-500 transition"
             >
-              <div>
-                <p className="text-lg font-semibold text-gray-800">
-                  Rider: <p>
-  {bookingRequest.approved
-    ? `${bookingRequest.rider.firstName} ${bookingRequest.rider.lastName}`
-    : `${bookingRequest.rider.firstName.charAt(0)}.`}
-</p>
-                </p>
-                <p className="text-gray-600 text-sm mt-1">
-                  From: {bookingRequest.pickup.area}, {bookingRequest.pickup.city}
-                  <br />
-                  To: {bookingRequest.destination.area}, {bookingRequest.destination.city}
-                </p>
-                {bookingRequest.preferredRoute && bookingRequest.preferredRoute.length > 0 && (
-                  <p className="text-gray-500 text-sm mt-1">
-                    Preferred Stops:{" "}
-                    {bookingRequest.preferredRoute.map((stop, index) => (
-                      <span key={index}>{stop.area}{index < bookingRequest.preferredRoute.length - 1 ? ", " : ""}</span>
-                    ))}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <p className="text-lg font-semibold text-gray-800">
+                    Rider:{" "}
+                    {bookingRequest.approved
+                      ? `${bookingRequest.rider.firstName} ${bookingRequest.rider.lastName}`
+                      : `${bookingRequest.rider.firstName.charAt(0)}.`}
                   </p>
-                )}
-              </div>
-              <div className="mt-4 md:mt-0">
-                {bookingRequest.approved ? (
-                  <span className="text-green-600 font-semibold">Approved</span>
-                ) : (
-                  <button
-                    onClick={() => handleApprove(id)}
-                    className="bg-emerald-500 text-white px-6 py-2 rounded-lg hover:bg-emerald-600 transition"
-                  >
-                    Approve
-                  </button>
-                )}
+                  <p className="text-sm text-gray-600 mt-1">
+                    From: <strong>{bookingRequest.pickup.area}</strong>, {bookingRequest.pickup.city}
+                    <br />
+                    To: <strong>{bookingRequest.destination.area}</strong>, {bookingRequest.destination.city}
+                  </p>
+                  {bookingRequest.preferredRoute?.length > 0 && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Preferred Stops:{" "}
+                      {bookingRequest.preferredRoute.map((stop, i) => (
+                        <span key={i}>
+                          {stop.area}
+                          {i < bookingRequest.preferredRoute.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  {bookingRequest.approved ? (
+                    <span className="text-green-600 font-semibold text-sm bg-green-100 px-4 py-1 rounded-full">
+                      ✅ Approved
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleApprove(id)}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg text-sm transition"
+                    >
+                      Approve Request
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

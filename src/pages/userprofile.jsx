@@ -5,6 +5,7 @@ function UserProfile() {
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({});
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const fetchUser = async () => {
     try {
@@ -41,7 +42,20 @@ function UserProfile() {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
       });
+
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        await axios.post("http://localhost:5001/users/upload-picture", formData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
+
       setEditMode(false);
+      setSelectedFile(null);
       fetchUser();
     } catch (err) {
       console.error("Error updating profile", err);
@@ -56,18 +70,40 @@ function UserProfile() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 mt-12 bg-white shadow-lg rounded-xl">
-        
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-emerald-600">My Profile</h2>
         <button
-            onClick={() => window.location.href = "/dashboard"}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:from-emerald-600 hover:to-emerald-700 transition"
+          onClick={() => window.location.href = "/dashboard"}
+          className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:from-emerald-600 hover:to-emerald-700 transition"
         >
-            Back to Dashboard
+          Back to Dashboard
         </button>
-        </div>
+      </div>
 
+      {/* Profile Image */}
+      <div className="flex flex-col items-center gap-4 mb-6">
+        {user.profileImageBase64 ? (
+          <img
+            src={`data:image/jpeg;base64,${user.profileImageBase64}`}
+            alt="Profile"
+            className="w-32 h-32 rounded-full object-cover border shadow-md"
+          />
+        ) : (
+          <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+            No Image
+          </div>
+        )}
+        {editMode && (
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setSelectedFile(e.target.files[0])}
+            className="text-sm"
+          />
+        )}
+      </div>
 
+      {/* User Info Form */}
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -115,11 +151,22 @@ function UserProfile() {
               }`}
             />
           </div>
+
+          <div>
+            <label className="text-gray-600 font-medium">Emergency Email</label>
+            <input
+              type="email"
+              value={form.emergencyEmail || ""}
+              disabled={!editMode}
+              onChange={(e) => handleChange("emergencyEmail", e.target.value)}
+              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 ${
+                editMode ? "focus:ring-emerald-500" : "bg-gray-100"
+              }`}
+            />
+          </div>
         </div>
 
-        <h3 className="text-xl font-semibold text-emerald-600 mt-6 mb-2">
-          Preferences
-        </h3>
+        <h3 className="text-xl font-semibold text-emerald-600 mt-6 mb-2">Preferences</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {["music", "smoking", "petFriendly", "ac"].map((field) => (
             <div key={field}>
@@ -142,9 +189,7 @@ function UserProfile() {
             <label className="text-gray-600">Gender Preference</label>
             <select
               value={form.preferences?.genderBased || "NONE"}
-              onChange={(e) =>
-                handlePreferenceChange("genderBased", e.target.value)
-              }
+              onChange={(e) => handlePreferenceChange("genderBased", e.target.value)}
               disabled={!editMode}
               className={`w-full mt-1 p-3 border rounded-lg ${
                 editMode ? "focus:ring-emerald-500" : "bg-gray-100"
@@ -177,6 +222,7 @@ function UserProfile() {
                 onClick={() => {
                   setEditMode(false);
                   setForm(user);
+                  setSelectedFile(null);
                 }}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-medium"
               >

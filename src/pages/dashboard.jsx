@@ -1,22 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Car, User, LogOut, PlusCircle, Search, ClipboardList, CheckCircle, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const handleLogout = () => {
     localStorage.removeItem("AuthToken");
     navigate("/");
   };
 
-  const role = localStorage.getItem("role");
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setRole(localStorage.getItem("role"));
+      setLoading(false);
+    }, 600); 
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-emerald-600 text-lg font-semibold animate-pulse">Loading Dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <button onClick={()=>navigate("/")} className="flex items-center gap-2">
+        <button onClick={() => navigate("/")} className="flex items-center gap-2">
           <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-2 rounded-lg">
             <Car className="text-white" />
           </div>
@@ -76,6 +92,13 @@ function Dashboard() {
               onClick={() => navigate("/incoming")}
             />
           )}
+
+          <DashboardCard
+            icon={<FileText className="text-emerald-600" />}
+            title="Alerts"
+            description="View important alerts or emergency notifications."
+            onClick={() => navigate("/alerts")}
+          />
         </div>
       </main>
     </div>
