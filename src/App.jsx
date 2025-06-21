@@ -14,6 +14,8 @@ import IncomingRequests from "./pages/incomingrequest";
 import MyBookings from "./pages/mybookings";
 import UserProfile from "./pages/userprofile";
 import BookingDetails from "./pages/bookingdetails";
+import DriverRides from "./pages/driverrides";
+import RideDetails from "./pages/ridedetails";
 
 export const AuthContext = createContext();
 function App() {
@@ -39,6 +41,8 @@ function App() {
         <Route path="/mybookings" element={<MyBookings />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/my-bookings/:id" element={<BookingDetails />} />
+        <Route path="/ride-details/:id" element={<RideDetails />} />
+        <Route path="/driver-rides" element={<DriverRides />} />
       </Routes>
     </Router>
     </MantineProvider>

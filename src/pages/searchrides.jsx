@@ -215,7 +215,7 @@ function SearchRides() {
           {ride.rideSearchDto.vehicle.brand} {ride.rideSearchDto.vehicle.model}
         </td>
         <td className="p-3">
-          {new Date(ride.routeMatchResult.arrivalTime).toLocaleString()}
+          {ride.routeMatchResult.arrivalTime}
         </td>
         <td className="p-3 font-semibold text-emerald-600">
           {Math.round(ride.routeMatchResult.score)}%

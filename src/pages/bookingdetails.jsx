@@ -44,7 +44,19 @@ function BookingDetails() {
         <p><strong>Phone:</strong> {driver.phoneNumber}</p>
 
         <h3 className="text-xl font-semibold mt-6">Your Request</h3>
-        <p><strong>Status:</strong> {approved ? "APPROVED" : "PENDING"}</p>
+        <p>
+        <strong>Status:</strong>{" "}
+        <span className="font-medium text-green-600">APPROVED</span>
+        </p>
+
+        {/* SOS Button */}
+        <button
+        onClick={() => alert("🚨 SOS Alert! Authorities have been notified.")}
+        className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+        >
+        🚨 Send SOS Alert
+        </button>
+
         <p><strong>Pickup:</strong> {pickup.area}</p>
         <p><strong>Drop:</strong> {destination.area}</p>
         {preferredRoute && preferredRoute.length > 0 && (

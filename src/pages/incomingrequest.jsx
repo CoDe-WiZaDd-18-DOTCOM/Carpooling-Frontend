@@ -56,7 +56,11 @@ function IncomingRequests() {
             >
               <div>
                 <p className="text-lg font-semibold text-gray-800">
-                  Rider: {bookingRequest.rider.firstName} {bookingRequest.rider.lastName}
+                  Rider: <p>
+  {bookingRequest.approved
+    ? `${bookingRequest.rider.firstName} ${bookingRequest.rider.lastName}`
+    : `${bookingRequest.rider.firstName.charAt(0)}.`}
+</p>
                 </p>
                 <p className="text-gray-600 text-sm mt-1">
                   From: {bookingRequest.pickup.area}, {bookingRequest.pickup.city}

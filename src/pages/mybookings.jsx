@@ -21,6 +21,17 @@ function MyBookings() {
     fetchMyBookings();
   }, []);
 
+  const maskEmail = (email) => {
+  const [name, domain] = email.split("@");
+  if (name.length <= 1) return `*@${domain}`;
+  return `${name[0]}${"*".repeat(name.length - 1)}@${domain}`;
+};
+
+const maskPhone = (phone) => {
+  if (phone.length < 2) return "XXXXXXXXXX";
+  return `XXXXXX${phone.slice(-4)}`;
+};
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-20">
       <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">My Ride Requests</h2>
@@ -48,16 +59,29 @@ function MyBookings() {
                   <p className="text-gray-600">
                     {pickup} ➝ {drop}
                   </p>
+                  {status === "PENDING" ? (
                   <p className="text-sm text-gray-500">
-                    Email: {driver.email}, Phone: {driver.phoneNumber}
-                  </p>
-                  {status === "APPROVED" && (
+                    Email: {maskEmail(driver.email)}, Phone: {maskPhone(driver.phoneNumber)}
+                    </p>) : (
+                    <p className="text-sm text-gray-500">
+                      Email: {driver.email}, Phone: {driver.phoneNumber}
+                    </p>
+                  )}
+                  <br />
+                  {status === "APPROVED" ? (
                     <button
                         className="mt-4 md:mt-0 bg-emerald-500 text-white px-4 py-2 rounded hover:bg-emerald-600 transition"
                         onClick={() => window.location.href = `/my-bookings/${id}`}
                     >
                         View Ride Details
                     </button>
+                    ):(
+                      <button
+                        className="mt-4 md:mt-0 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition cursor-not-allowed"
+                        disabled
+                        >
+                            Pending Approval
+                        </button>
                     )}
 
                 </div>

@@ -50,24 +50,43 @@ function Landing() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a
-                href="#features"
-                className="text-gray-600 hover:text-emerald-600 transition-colors"
-              >
-                Features
-              </a>
+              {isLoggedIn ? (
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="text-emerald-600 hover:text-emerald-700 font-semibold"
+                >
+                  Dashboard
+                </button>
+              ) :(
+                  <a
+                    href="#features"
+                    className="text-gray-600 hover:text-emerald-600 transition-colors"
+                  >
+                    Features
+                  </a>
+              )}
               <a
                 href="#how-it-works"
                 className="text-gray-600 hover:text-emerald-600 transition-colors"
               >
                 How It Works
               </a>
+              {isLoggedIn ? (
+                <a
+                  className="text-gray-600 hover:text-emerald-600 transition-colors cursor-pointer"
+                  onClick={() => navigate("/profile")}
+                >
+                  Profile
+                </a>
+              ):(
               <a
                 href="#benefits"
                 className="text-gray-600 hover:text-emerald-600 transition-colors"
               >
                 Benefits
               </a>
+              )}
+
               {isLoggedIn ? (
                 <button
                   onClick={handleLogout}
