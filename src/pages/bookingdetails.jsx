@@ -5,6 +5,8 @@ import axios from "axios";
 function BookingDetails() {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
+  const [sosMessage, setSosMessage] = useState("");
+
 
   const fetchBookingDetails = async () => {
     try {
@@ -26,6 +28,30 @@ function BookingDetails() {
   if (!booking) return <div className="text-center mt-10">Loading...</div>;
 
   const { ride, pickup, destination, preferredRoute, approved, driver } = booking;
+
+  const handleSendSos = async () => {
+    try {
+      const messageToSend = sosMessage.trim() === "" ? "Please help me!" : sosMessage;
+
+      const res = await axios.post(
+        `http://localhost:5001/sos/alert/${id}`,
+        messageToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+            "Content-Type": "text/plain",
+          },
+        }
+      );
+
+      alert("🚨 SOS Alert sent to authorities!");
+      setSosMessage("");
+    } catch (err) {
+      console.error("SOS Error:", err);
+      alert("❌ Failed to send SOS alert.");
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-20">
@@ -50,12 +76,26 @@ function BookingDetails() {
         </p>
 
         {/* SOS Button */}
-        <button
-        onClick={() => alert("🚨 SOS Alert! Authorities have been notified.")}
-        className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-        >
-        🚨 Send SOS Alert
-        </button>
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Optional Message to Authorities:
+          </label>
+          <textarea
+            rows="3"
+            className="w-full border rounded-md p-2 focus:ring-2 focus:ring-red-400"
+            value={sosMessage}
+            onChange={(e) => setSosMessage(e.target.value)}
+            placeholder="Enter your message or leave blank for default"
+          ></textarea>
+
+          <button
+            onClick={handleSendSos}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+          >
+            🚨 Send SOS Alert
+          </button>
+        </div>
+
 
         <p><strong>Pickup:</strong> {pickup.area}</p>
         <p><strong>Drop:</strong> {destination.area}</p>
