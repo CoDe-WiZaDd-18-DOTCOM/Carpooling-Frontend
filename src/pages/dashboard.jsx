@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Car, User, LogOut, PlusCircle, Search, ClipboardList, CheckCircle, FileText } from "lucide-react";
+import {
+  Car, User, LogOut, PlusCircle, Search, ClipboardList, CheckCircle, FileText
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
 
   const handleLogout = () => {
     localStorage.removeItem("AuthToken");
@@ -16,9 +20,26 @@ function Dashboard() {
     const timer = setTimeout(() => {
       setRole(localStorage.getItem("role"));
       setLoading(false);
-    }, 600); 
+    }, 600);
     return () => clearTimeout(timer);
   }, []);
+
+  // useEffect(() => {
+    
+  //   const fetchBookings = async () => {
+  //     try {
+  //       const response = await fetch("https://dummyapi.com/api/bookings"); 
+  //       const data = await response.json();
+  //       setRecentBookings(data.bookings || []); 
+  //     } catch (error) {
+  //       console.error("Error fetching bookings:", error);
+  //     } finally {
+  //       setBookingsLoading(false);
+  //     }
+  //   };
+
+  //   fetchBookings();
+  // }, []);
 
   if (loading) {
     return (
@@ -51,7 +72,7 @@ function Dashboard() {
       <main className="p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Welcome to your Dashboard</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           {role === "DRIVER" && (
             <DashboardCard
               icon={<PlusCircle className="text-emerald-600" />}
@@ -100,6 +121,61 @@ function Dashboard() {
             onClick={() => navigate("/alerts")}
           />
         </div>
+
+        {/* Recent Bookings Table
+        <section className="bg-white shadow-md rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Bookings</h3>
+          {bookingsLoading ? (
+              <p className="text-sm text-gray-500 animate-pulse">Loading recent bookings...</p>
+          ) : recentBookings.length === 0 ? (
+            <p className="text-sm text-gray-500">No recent bookings found.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto text-sm text-gray-700">
+                <thead>
+                  <tr className="bg-emerald-100 text-gray-700">
+                    <th className="px-4 py-2 text-left">Driver</th>
+                    <th className="px-4 py-2 text-left">Route</th>
+                    <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentBookings.map(({ id, bookingRequest }) => {
+                    const { driver, pickup, destination, approved } = bookingRequest;
+                    const status = approved ? "APPROVED" : "PENDING";
+
+                    return (
+                      <tr key={id} className="border-t hover:bg-gray-50">
+                        <td className="px-4 py-2">
+                          {driver.firstName} {driver.lastName}
+                        </td>
+                        <td className="px-4 py-2">
+                          {pickup.area} ➝ {destination.area}
+                        </td>
+                        <td className="px-4 py-2">{status}</td>
+                        <td className="px-4 py-2">
+                          {approved ? (
+                            <button
+                              onClick={() => navigate(`/my-bookings/${id}`)}
+                              className="bg-emerald-500 text-white px-3 py-1 rounded hover:bg-emerald-600 text-xs"
+                            >
+                              View
+                            </button>
+                          ) : (
+                            <span className="text-gray-400 text-xs">Pending</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+
+        </section> */}
       </main>
     </div>
   );

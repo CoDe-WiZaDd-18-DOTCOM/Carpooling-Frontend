@@ -39,7 +39,7 @@ function SosAlerts() {
         <div className="space-y-6">
           {alerts.map((alert) => {
             const booking = alert.bookingRequest;
-            const rider = alert.user;
+            const rider = booking?.rider;
             const driver = booking?.driver;
 
             return (

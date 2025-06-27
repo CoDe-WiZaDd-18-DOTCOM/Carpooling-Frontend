@@ -45,6 +45,7 @@ function Landing() {
               </div>
               <span className="text-2xl font-bold text-gray-800">
                 CarpoolConnect
+                
               </span>
             </div>
 

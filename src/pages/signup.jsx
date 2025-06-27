@@ -212,6 +212,16 @@ function Signup() {
         </form>
 
         <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=652720590250-tvni6g7q7d8go16tfduq3pre3m3mkveu.apps.googleusercontent.com&redirect_uri=http://localhost:5001/auth/google/callback&response_type=code&scope=openid%20email%20profile"}
+              className="w-full bg-white text-gray-800 border border-gray-300 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100"
+            >
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="h-5 w-5" />
+              Sign up with Google
+            </button>
+          </div>
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
             <button onClick={() => navigate("/login")} className="text-emerald-600 font-semibold">

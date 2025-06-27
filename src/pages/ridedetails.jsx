@@ -6,6 +6,7 @@ function RideDetails() {
   const { id } = useParams();
   const [ride, setRide] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     const fetchRideData = async () => {
@@ -32,6 +33,22 @@ function RideDetails() {
     fetchRideData();
   }, [id]);
 
+  const handleCloseRide = async () => {
+    try {
+      setIsClosing(true);
+      const token = localStorage.getItem("AuthToken");
+      const rideRes=await axios.post(`http://localhost:5001/rides/close-ride/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setRide(rideRes.data);
+    } catch (error) {
+      console.error("Failed to close ride:", error);
+    } finally {
+      setIsClosing(false);
+    }
+  };
+
   if (!ride) {
     return <p className="text-center text-gray-500 py-10">Loading ride details...</p>;
   }
@@ -43,14 +60,29 @@ function RideDetails() {
       {/* Ride Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8">
         <h3 className="text-xl font-semibold text-gray-800 mb-2">
-          {ride.route[0].location.area} ➝ {ride.route[0].location.area}
+          {ride.route[0].location.area} ➝ {ride.route[ride.route.length - 1].location.area}
         </h3>
-        {/* <p className="text-gray-600 mb-1">City: {ride.pickup.city} ➝ {ride.drop.city}</p> */}
         <p className="text-gray-600 mb-1">Seats: {ride.availableSeats}/{ride.seatCapacity}</p>
         <p className="text-gray-600 mb-1">Status: {ride.status}</p>
         <p className="text-gray-600 mb-1">
           Vehicle: {ride.vehicle.brand} {ride.vehicle.model} ({ride.vehicle.color})
         </p>
+
+        {/* ✅ Close Ride Button */}
+        {ride.status !== "CLOSED" && (
+          <div className="mt-6">
+            <button
+              onClick={handleCloseRide}
+              disabled={isClosing}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow disabled:opacity-50"
+            >
+              {isClosing ? "Closing..." : "Close Ride"}
+            </button>
+            <p className="text-sm text-gray-500 mt-1">
+              Close this after completion of ride.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Booking Requests */}
