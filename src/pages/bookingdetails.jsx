@@ -153,59 +153,68 @@ function BookingDetails() {
           </p>
         </section>
 
-        {/* SOS */}
-        <section>
-          <h3 className="text-xl font-semibold text-red-600">Send SOS Alert</h3>
-          <textarea
-            rows={4}
-            className="w-full mt-2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800"
-            placeholder="Type your emergency message..."
-            value={sosMessage}
-            onChange={(e) => setSosMessage(e.target.value)}
-          />
-          <div className="flex flex-wrap gap-3 mt-3">
-            <button
-              onClick={handleGetCurrentLocation}
-              disabled={isFetchingLocation}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {isFetchingLocation ? "Fetching..." : "📍 Use My Location"}
-            </button>
-            <button
-              onClick={handleSendSos}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-            >
-              🚨 Send SOS
-            </button>
+        {ride.status === "CLOSED" ? (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-4 rounded-md">
+            🚗 This ride has been <strong>completed</strong>. SOS and location sharing features are disabled.
           </div>
-        </section>
+        ) : (
+          <>
+            {/* SOS */}
+            <section>
+              <h3 className="text-xl font-semibold text-red-600">Send SOS Alert</h3>
+              <textarea
+                rows={4}
+                className="w-full mt-2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800"
+                placeholder="Type your emergency message..."
+                value={sosMessage}
+                onChange={(e) => setSosMessage(e.target.value)}
+              />
+              <div className="flex flex-wrap gap-3 mt-3">
+                <button
+                  onClick={handleGetCurrentLocation}
+                  disabled={isFetchingLocation}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                >
+                  {isFetchingLocation ? "Fetching..." : "📍 Use My Location"}
+                </button>
+                <button
+                  onClick={handleSendSos}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                >
+                  🚨 Send SOS
+                </button>
+              </div>
+            </section>
 
-        {/* Share Location */}
-        <section>
-          <h3 className="text-xl font-semibold text-emerald-700">Live Location Sharing</h3>
-          <input
-            type="text"
-            placeholder="Enter or use your current location"
-            className="w-full mt-2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-800"
-            value={locationText}
-            onChange={(e) => setLocationText(e.target.value)}
-          />
-          <div className="flex flex-wrap gap-3 mt-3">
-            <button
-              onClick={handleGetCurrentLocationForShare}
-              disabled={isFetchingLocation}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {isFetchingLocation ? "Fetching..." : "📍 Use My Location"}
-            </button>
-            <button
-              onClick={handleShareLocation}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition"
-            >
-              📤 Share Location
-            </button>
-          </div>
-        </section>
+            {/* Share Location */}
+            <section>
+              <h3 className="text-xl font-semibold text-emerald-700">Live Location Sharing</h3>
+              <input
+                type="text"
+                placeholder="Enter or use your current location"
+                className="w-full mt-2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-800"
+                value={locationText}
+                onChange={(e) => setLocationText(e.target.value)}
+              />
+              <div className="flex flex-wrap gap-3 mt-3">
+                <button
+                  onClick={handleGetCurrentLocationForShare}
+                  disabled={isFetchingLocation}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                >
+                  {isFetchingLocation ? "Fetching..." : "📍 Use My Location"}
+                </button>
+                <button
+                  onClick={handleShareLocation}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition"
+                >
+                  📤 Share Location
+                </button>
+              </div>
+            </section>
+          </>
+        )}
+
 
         {/* Pickup & Drop */}
         <section className="text-gray-700 space-y-1">
