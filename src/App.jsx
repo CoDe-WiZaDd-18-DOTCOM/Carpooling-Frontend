@@ -18,6 +18,7 @@ import DriverRides from "./pages/driverrides";
 import RideDetails from "./pages/ridedetails";
 import SosAlerts from "./pages/sosalerts";
 import OAuthSuccess from "./pages/OAuthSuccess";
+import AddAuthorities from "./pages/AddAUthorites";
 
 export const AuthContext = createContext();
 function App() {
@@ -47,6 +48,7 @@ function App() {
         <Route path="/driver-rides" element={<DriverRides />} />
         <Route path="/alerts" element={<SosAlerts />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
+        <Route path="/add-authorities" element={<AddAuthorities />} />
       </Routes>
     </Router>
     </MantineProvider>

@@ -120,6 +120,14 @@ function Dashboard() {
             description="View important alerts or emergency notifications."
             onClick={() => navigate("/alerts")}
           />
+
+          <DashboardCard
+            icon={<FileText className="text-emerald-600" />}
+            title="Add Authorities"
+            description="Add sos authorities for each area."
+            onClick={() => navigate("/add-authorities")}
+          />
+          
         </div>
 
         {/* Recent Bookings Table
