@@ -97,11 +97,17 @@ function SearchRides() {
 
   const sortedResults = [...results].sort((a, b) => {
     if (!sortConfig.key) return 0;
+
+    const mapTime = (timeStr) => {
+        const [hr,min,sec] = timeStr.split(":").map(Number);
+        return hr*3600+min*60+sec;
+    }
+
     const valA = sortConfig.key === "arrivalTime"
-      ? new Date(a.routeMatchResult.arrivalTime)
+      ? mapTime(a.routeMatchResult.arrivalTime)
       : a.routeMatchResult.score;
     const valB = sortConfig.key === "arrivalTime"
-      ? new Date(b.routeMatchResult.arrivalTime)
+      ? mapTime(b.routeMatchResult.arrivalTime)
       : b.routeMatchResult.score;
     return sortConfig.direction === "asc" ? valA - valB : valB - valA;
   });
