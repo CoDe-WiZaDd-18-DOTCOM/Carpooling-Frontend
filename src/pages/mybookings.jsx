@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Trash2, X, AlertTriangle } from "lucide-react";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const fetchMyBookings = async () => {
     try {
@@ -24,6 +26,21 @@ function MyBookings() {
     fetchMyBookings();
   }, []);
 
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5001/bookings/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+        },
+      });
+      setBookings((prev) => prev.filter((b) => b.id !== id));
+      setConfirmDeleteId(null);
+    } catch (err) {
+      console.error("Failed to delete booking:", err);
+      alert("Failed to cancel booking. Please try again.");
+    }
+  };
+
   const maskEmail = (email) => {
     const [name, domain] = email.split("@");
     if (name.length <= 1) return `*@${domain}`;
@@ -39,7 +56,7 @@ function MyBookings() {
     return <div className="text-center text-gray-500 mt-10">Loading your bookings...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-20">
+    <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-20 relative">
       <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">My Ride Requests</h2>
 
       {bookings.length === 0 ? (
@@ -48,13 +65,24 @@ function MyBookings() {
         <div className="grid gap-6">
           {bookings.map(({ id, bookingRequest }) => {
             const { driver, pickup, destination, approved } = bookingRequest;
-            const status = approved ? "APPROVED" : "PENDING";
 
             return (
               <div
                 key={id}
-                className="bg-white border-l-4 border-emerald-500 p-6 rounded-xl shadow hover:shadow-lg transition"
+                className="bg-white border-l-4 border-emerald-500 p-6 rounded-xl shadow hover:shadow-lg transition relative"
               >
+                {!approved && (
+                  <div className="absolute top-3 right-3">
+                    <button
+                      onClick={() => setConfirmDeleteId(id)}
+                      title="Cancel Booking"
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800">
@@ -69,7 +97,7 @@ function MyBookings() {
                     </p>
                   </div>
 
-                  <div>
+                  <div className="flex flex-col gap-2">
                     {approved ? (
                       <button
                         className="bg-emerald-500 text-white px-5 py-2 rounded-lg hover:bg-emerald-600 transition"
@@ -90,6 +118,41 @@ function MyBookings() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white w-[90%] max-w-md p-6 rounded-xl shadow-xl relative">
+            <button
+              onClick={() => setConfirmDeleteId(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="text-yellow-500 w-6 h-6" />
+              <h3 className="text-xl font-semibold text-gray-800">Confirm Cancellation</h3>
+            </div>
+            <p className="text-gray-600 mt-2">
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDeleteId)}
+                className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
+              >
+                Yes, Cancel It
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

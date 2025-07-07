@@ -8,6 +8,7 @@ function RideDetails() {
   const [ride, setRide] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
 
   useEffect(() => {
     const fetchRideData = async () => {
@@ -135,51 +136,87 @@ function RideDetails() {
                 const status = approved ? "APPROVED" : "PENDING";
                 const statusColor = approved ? "text-green-600" : "text-yellow-600";
 
-                return (
-                  <div key={bookingId} className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-gray-50 p-4 rounded-lg shadow-md">
-                  {rider.profileImageBase64 && (
-                    <img
-                      src={`data:image/jpeg;base64,${rider.profileImageBase64}`}
-                      alt="Rider"
-                      className={`w-14 h-14 rounded-full object-cover border ${
-                        approved ? "" : "blur-sm"
-                      }`}
-                    />
-                  )}
-                  <div className="flex-1 w-full">
-                    <h4 className="text-lg font-semibold text-gray-800">
-                      {rider.firstName} {rider.lastName}
-                    </h4>
-                    <p className="text-sm text-gray-600">📧 {rider.email}</p>
-                    <p className="text-sm text-gray-600">📞 {rider.phoneNumber}</p>
+                const handleApprove = async (bookingId) => {
+                  try {
+                    setApprovingId(bookingId); // 🆕
+                    await axios.post(`http://localhost:5001/bookings/${bookingId}/approve`, {}, {
+                      headers: {
+                        Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+                      },
+                    });
 
-                    {/* Rider Preferences */}
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
-                        🎵 Music: {bookingRequest.riderPreferences.music}
-                      </span>
-                      <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                        ❄️ AC: {bookingRequest.riderPreferences.ac}
-                      </span>
-                      <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                        🚬 Smoking: {bookingRequest.riderPreferences.smoking}
-                      </span>
-                      <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
-                        🐾 Pet-Friendly: {bookingRequest.riderPreferences.petFriendly}
-                      </span>
-                      <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                        🚻 Gender: {bookingRequest.riderPreferences.genderBased}
-                      </span>
+                    setBookings((prev) =>
+                      prev.map((b) =>
+                        b.id === bookingId ? { ...b, bookingRequest: { ...b.bookingRequest, approved: true } } : b
+                      )
+                    );
+                  } catch (error) {
+                    console.error("Failed to approve booking:", error);
+                    alert("Something went wrong while approving. Try again.");
+                  } finally {
+                    setApprovingId(null); 
+                  }
+                };
+
+
+                return (
+                  <div
+                    key={bookingId}
+                    className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-gray-50 p-4 rounded-lg shadow-md"
+                  >
+                    {rider.profileImageBase64 && (
+                      <img
+                        src={`data:image/jpeg;base64,${rider.profileImageBase64}`}
+                        alt="Rider"
+                        className={`w-14 h-14 rounded-full object-cover border ${
+                          approved ? "" : "blur-sm"
+                        }`}
+                      />
+                    )}
+
+                    <div className="flex-1 w-full">
+                      <h4 className="text-lg font-semibold text-gray-800">
+                        {rider.firstName} {rider.lastName}
+                      </h4>
+                      <p className="text-sm text-gray-600">📧 {rider.email}</p>
+                      <p className="text-sm text-gray-600">📞 {rider.phoneNumber}</p>
+
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                        <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
+                          🎵 Music: {rider.preferences.music}
+                        </span>
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                          ❄️ AC: {rider.preferences.ac}
+                        </span>
+                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                          🚬 Smoking: {rider.preferences.smoking}
+                        </span>
+                        <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                          🐾 Pet-Friendly: {rider.preferences.petFriendly}
+                        </span>
+                        <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                          🚻 Gender: {rider.preferences.genderBased}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <span className={`text-sm font-bold ${statusColor}`}>Status: {status}</span>
+                      {!approved && (
+                        <button
+                          onClick={() => handleApprove(bookingId)}
+                          disabled={approvingId === bookingId}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-1.5 rounded-md font-semibold disabled:opacity-60"
+                        >
+                          {approvingId === bookingId ? "Approving..." : "Approve"}
+                        </button>
+                      )}
+
                     </div>
                   </div>
-
-                  <div className={`text-sm font-bold mt-2 md:mt-0 ${statusColor}`}>
-                    Status: {status}
-                  </div>
-                </div>
-
                 );
               })}
+
             </div>
           )}
         </div>
