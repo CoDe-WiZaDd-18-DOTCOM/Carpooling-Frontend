@@ -1,43 +1,52 @@
 import axios from "axios";
 import { useState } from "react";
+import LocationSearchInput from "./LocationSearchInput";
 
 function AddAuthorities() {
-  const [formData, setFormData] = useState({
-    area: "",
-    email: "",
-  });
-
-  const [authorities, setAuthorities] = useState();
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [email, setEmail] = useState("");
+  const [authorities, setAuthorities] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   const addAuth = async () => {
+    if (!selectedLocation || !email) {
+      alert("Please select a location and provide an email.");
+      return;
+    }
+
     try {
-      const res = await axios.post("/api/authorities", formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+      const res = await axios.post(
+        "http://localhost:5001/sos/authority",
+        {
+          label: selectedLocation.label,
+          email,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+          },
+        }
+      );
 
       if (res.status === 200) {
-        alert("Successfully added");
-        setFormData({ area: "", email: "" });
+        alert("✅ Successfully added");
+        setSelectedLocation(null);
+        setEmail("");
       }
     } catch (error) {
-      console.log(error);
-      alert("Failed to add!");
+      console.error(error);
+      alert("❌ Failed to add!");
     }
   };
 
   const fetchAuth = async () => {
+    if (!selectedLocation) {
+      alert("Please select a location.");
+      return;
+    }
+
     try {
-      const res = await axios.get(`/api/authorities/${formData.area}`, {
+      const res = await axios.get(`/api/authorities/${selectedLocation.label}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
@@ -46,12 +55,12 @@ function AddAuthorities() {
       if (res.status === 200) {
         setAuthorities(res.data);
         setIsVisible(true);
-      } else if (res.status === 300) {
-        alert("Authorities data not found");
+      } else {
+        alert("Authorities data not found.");
       }
     } catch (error) {
-      console.log(error);
-      alert("Something went wrong");
+      console.error(error);
+      alert("Something went wrong.");
     }
   };
 
@@ -64,27 +73,25 @@ function AddAuthorities() {
       {/* Add Authority Form */}
       <section className="bg-white shadow-md rounded-xl p-6 max-w-xl mx-auto">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Add Authority</h3>
-        <div className="flex justify-between">
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
-                <input
-                    type="text"
-                    name="area"
-                    value={formData.area}
-                    onChange={handleChange}
-                    className="input-style"
-                />
-            </div>
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Authority Email</label>
-                <input
-                    type="text"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="input-style"
-                />
-            </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select City (via Nominatim)
+          </label>
+          <LocationSearchInput onSelect={setSelectedLocation} />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Authority Email
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-style w-full"
+          />
         </div>
 
         <button
@@ -97,17 +104,17 @@ function AddAuthorities() {
 
       {/* Fetch Authority */}
       <section className="bg-white shadow-md rounded-xl p-6 max-w-xl mx-auto mt-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Fetch Authority Details</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          Fetch Authority Details
+        </h3>
+
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
-          <input
-            type="text"
-            name="area"
-            value={formData.area}
-            onChange={handleChange}
-            className="input-style"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select City (via Nominatim)
+          </label>
+          <LocationSearchInput onSelect={setSelectedLocation} />
         </div>
+
         <button
           onClick={fetchAuth}
           className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded"
@@ -121,9 +128,6 @@ function AddAuthorities() {
         <section className="bg-white shadow-md rounded-xl p-6 max-w-xl mx-auto mt-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Authority Details</h3>
           <div className="flex flex-col gap-2 text-sm text-gray-700">
-            <div>
-              <strong>Area:</strong> {authorities.area}
-            </div>
             <div>
               <strong>City:</strong> {authorities.city}
             </div>

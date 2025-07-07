@@ -61,7 +61,7 @@ function MyBookings() {
                       Driver: {driver.firstName} {driver.lastName}
                     </h3>
                     <p className="text-gray-600">
-                      {pickup.area} ➝ {destination.area}
+                      {pickup.label} ➝ {destination.label}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       Email: {approved ? driver.email : maskEmail(driver.email)}, Phone:{" "}

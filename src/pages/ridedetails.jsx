@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { Car, Clock, MapPin, Users, ShieldCheck } from "lucide-react";
 
 function RideDetails() {
   const { id } = useParams();
@@ -13,18 +14,15 @@ function RideDetails() {
       try {
         const token = localStorage.getItem("AuthToken");
 
-        // Fetch ride details
         const rideRes = await axios.get(`http://localhost:5001/rides/ride/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setRide(rideRes.data);
 
-        // Fetch bookings for the ride
         const bookingsRes = await axios.get(`http://localhost:5001/bookings/booking/by-ride/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBookings(bookingsRes.data);
-
       } catch (error) {
         console.error("Error fetching ride or bookings:", error);
       }
@@ -37,10 +35,9 @@ function RideDetails() {
     try {
       setIsClosing(true);
       const token = localStorage.getItem("AuthToken");
-      const rideRes=await axios.post(`http://localhost:5001/rides/close-ride/${id}`, {}, {
+      const rideRes = await axios.post(`http://localhost:5001/rides/close-ride/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setRide(rideRes.data);
     } catch (error) {
       console.error("Failed to close ride:", error);
@@ -54,82 +51,139 @@ function RideDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-6 md:px-20">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Ride Details</h2>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-indigo-50 py-10 px-6 md:px-24">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-4xl font-extrabold text-gray-800 mb-10 text-center">🚘 Ride Overview</h2>
 
-      {/* Ride Info */}
-      <div className="bg-white p-6 rounded-xl shadow-md mb-8">
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">
-          {ride.route[0].location.area} ➝ {ride.route[ride.route.length - 1].location.area}
-        </h3>
-        <p className="text-gray-600 mb-1">Seats: {ride.availableSeats}/{ride.seatCapacity}</p>
-        <p className="text-gray-600 mb-1">Status: {ride.status}</p>
-        <p className="text-gray-600 mb-1">
-          Vehicle: {ride.vehicle.brand} {ride.vehicle.model} ({ride.vehicle.color})
-        </p>
+        {/* Ride Summary Card */}
+        <div className="bg-white shadow-xl rounded-2xl p-8 mb-10 border-l-4 border-emerald-500">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-emerald-600 flex items-center gap-2">
+              <MapPin className="text-emerald-500" /> Full Route
+            </h3>
+            <ol className="mt-4 ml-5 space-y-3 text-gray-700 list-decimal">
+              {ride.route.map((stop, idx) => (
+                <li key={idx}>
+                  <p className="font-medium">{stop.location.label}</p>
+                  <p className="text-sm text-gray-500 flex items-center gap-1">
+                    <Clock className="w-4 h-4" /> {stop.arrivalTime}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
 
-        {/* ✅ Close Ride Button */}
-        {ride.status !== "CLOSED" && (
-          <div className="mt-6">
-            <button
-              onClick={handleCloseRide}
-              disabled={isClosing}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow disabled:opacity-50"
-            >
-              {isClosing ? "Closing..." : "Close Ride"}
-            </button>
-            <p className="text-sm text-gray-500 mt-1">
-              Close this after completion of ride.
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+            <p className="flex items-center gap-2">
+              <Users className="text-emerald-500" /> Seats:{" "}
+              <span className="font-semibold">
+                {ride.availableSeats}/{ride.seatCapacity}
+              </span>
+            </p>
+            <p className="flex items-center gap-2">
+              <ShieldCheck className="text-emerald-500" /> Status:{" "}
+              <span className={`font-semibold ${ride.status === "OPEN" ? "text-green-600" : "text-gray-600"}`}>
+                {ride.status}
+              </span>
+            </p>
+            <p className="flex items-center gap-2 col-span-2">
+              <Car className="text-emerald-500" />
+              Vehicle:{" "}
+              <span className="font-semibold">
+                {ride.vehicle.brand} {ride.vehicle.model} ({ride.vehicle.color})
+              </span>
             </p>
           </div>
-        )}
-      </div>
 
-      {/* Booking Requests */}
-      <h3 className="text-2xl font-semibold text-gray-800 mb-4">Booking Requests</h3>
+          {/* Ride Preferences */}
+          <div className="mt-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-1">Ride Preferences</h4>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">🎵 Music: {ride.preferences.music}</span>
+              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">❄️ AC: {ride.preferences.ac}</span>
+              <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full">🚬 Smoking: {ride.preferences.smoking}</span>
+              <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">🐾 Pet-Friendly: {ride.preferences.petFriendly}</span>
+              <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full">🚻 Gender: {ride.preferences.genderBased}</span>
+            </div>
+          </div>
 
-      {bookings.length === 0 ? (
-        <p className="text-gray-500">No booking requests yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {bookings.map((wrapper) => {
-            const { id: bookingId, bookingRequest } = wrapper;
-            const rider = bookingRequest.rider;
-            const statusText = bookingRequest.approved ? "APPROVED" : "PENDING";
-            const statusClass = bookingRequest.approved ? "text-green-600" : "text-yellow-600";
 
-            return (
-              <div
-                key={bookingId}
-                className="bg-white p-4 rounded-lg shadow border"
+          {ride.status !== "CLOSED" && (
+            <div className="mt-8 text-right">
+              <button
+                onClick={handleCloseRide}
+                disabled={isClosing}
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow font-semibold disabled:opacity-50"
               >
-                <div className="flex items-center gap-4 mb-2">
+                {isClosing ? "Closing..." : "Close Ride"}
+              </button>
+              <p className="text-xs text-gray-500 mt-1">Click after ride is complete.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Booking Requests */}
+        <div className="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-indigo-500">
+          <h3 className="text-2xl font-bold text-indigo-700 mb-4">📬 Booking Requests</h3>
+
+          {bookings.length === 0 ? (
+            <p className="text-gray-500">No booking requests yet.</p>
+          ) : (
+            <div className="grid gap-6">
+              {bookings.map(({ id: bookingId, bookingRequest }) => {
+                const { rider, approved } = bookingRequest;
+                const status = approved ? "APPROVED" : "PENDING";
+                const statusColor = approved ? "text-green-600" : "text-yellow-600";
+
+                return (
+                  <div key={bookingId} className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-gray-50 p-4 rounded-lg shadow-md">
                   {rider.profileImageBase64 && (
                     <img
                       src={`data:image/jpeg;base64,${rider.profileImageBase64}`}
                       alt="Rider"
-                      className={`w-12 h-12 rounded-full object-cover border ${
-                        bookingRequest.approved ? "" : "blur-sm"
+                      className={`w-14 h-14 rounded-full object-cover border ${
+                        approved ? "" : "blur-sm"
                       }`}
                     />
                   )}
-                  <div>
+                  <div className="flex-1 w-full">
                     <h4 className="text-lg font-semibold text-gray-800">
                       {rider.firstName} {rider.lastName}
                     </h4>
-                    <p className="text-sm text-gray-600">Email: {rider.email}</p>
-                    <p className="text-sm text-gray-600">Phone: {rider.phoneNumber}</p>
+                    <p className="text-sm text-gray-600">📧 {rider.email}</p>
+                    <p className="text-sm text-gray-600">📞 {rider.phoneNumber}</p>
+
+                    {/* Rider Preferences */}
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                      <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
+                        🎵 Music: {bookingRequest.riderPreferences.music}
+                      </span>
+                      <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                        ❄️ AC: {bookingRequest.riderPreferences.ac}
+                      </span>
+                      <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                        🚬 Smoking: {bookingRequest.riderPreferences.smoking}
+                      </span>
+                      <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                        🐾 Pet-Friendly: {bookingRequest.riderPreferences.petFriendly}
+                      </span>
+                      <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                        🚻 Gender: {bookingRequest.riderPreferences.genderBased}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={`text-sm font-bold mt-2 md:mt-0 ${statusColor}`}>
+                    Status: {status}
                   </div>
                 </div>
 
-                <p className={`text-sm font-medium mt-2 ${statusClass}`}>
-                  Status: {statusText}
-                </p>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

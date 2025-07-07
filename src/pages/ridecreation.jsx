@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { RIDE_URL } from "../utils/apis";
+import LocationSearchInput from "./LocationSearchInput";
 
 const RideCreate = () => {
-  const [route, setRoute] = useState([{ landmark: "", area: "", city: "", arrivalTime: "" }]);
+  const [route, setRoute] = useState([{ location: null, arrivalTime: "" }]);
   const [seatCapacity, setSeatCapacity] = useState(1);
   const [vehicle, setVehicle] = useState({
     model: "",
@@ -21,26 +22,23 @@ const RideCreate = () => {
   const [loading, setLoading] = useState(false);
 
   const addRouteStop = () => {
-    setRoute([...route, { landmark: "", area: "", city: "", arrivalTime: "" }]);
+    setRoute([...route, { location: null, arrivalTime: "" }]);
   };
 
-  const updateRouteStop = (index, field, value) => {
+  const updateRouteStop = (index, key, value) => {
     const updatedRoute = [...route];
-    updatedRoute[index][field] = value;
+    updatedRoute[index][key] = value;
     setRoute(updatedRoute);
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const requestBody = {
-      route: route.map(stop => ({
-        location: {
-          landmark: stop.landmark,
-          area: stop.area,
-          city: stop.city,
-        },
-        arrivalTime: stop.arrivalTime,
-      })),
+     route: route.map(stop => ({
+      location: stop.location,
+      arrivalTime: stop.arrivalTime,
+    })),
       seatCapacity,
       availableSeats: seatCapacity,
       vehicle,
@@ -74,27 +72,10 @@ const RideCreate = () => {
             <h3 className="text-xl font-semibold text-gray-700">Route (Start → Stops → End)</h3>
             {route.map((stop, index) => (
               <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input
-                  type="text"
-                  placeholder="Landmark"
-                  className="input-style"
-                  value={stop.landmark}
-                  onChange={(e) => updateRouteStop(index, "landmark", e.target.value)}
+                <LocationSearchInput
+                  onSelect={(loc) => updateRouteStop(index, "location", loc)}
                 />
-                <input
-                  type="text"
-                  placeholder="Area"
-                  className="input-style"
-                  value={stop.area}
-                  onChange={(e) => updateRouteStop(index, "area", e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="City"
-                  className="input-style"
-                  value={stop.city}
-                  onChange={(e) => updateRouteStop(index, "city", e.target.value)}
-                />
+
                 <input
                   type="time"
                   className="input-style"

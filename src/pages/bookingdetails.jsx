@@ -120,7 +120,7 @@ function BookingDetails() {
         <section>
           <h3 className="text-2xl font-semibold text-emerald-700 mb-4">Ride Info</h3>
           <div className="space-y-1 text-gray-700">
-            <p><strong>Route:</strong> {ride.route.map((stop) => stop.location.area).join(" ➝ ")}</p>
+            <p><strong>Route:</strong> {ride.route.map((stop) => stop.location.label).join(" ➝ ")}</p>
             <p><strong>Seats Available:</strong> {ride.availableSeats} / {ride.seatCapacity}</p>
           </div>
         </section>
@@ -218,11 +218,13 @@ function BookingDetails() {
 
         {/* Pickup & Drop */}
         <section className="text-gray-700 space-y-1">
-          <p><strong>Pickup:</strong> {pickup.area}</p>
-          <p><strong>Drop:</strong> {destination.area}</p>
+          <p><strong>Pickup:</strong> {pickup.label}</p>
+          <p><strong>Drop:</strong> {destination.label}</p>
+
           {preferredRoute && preferredRoute.length > 0 && (
-            <p><strong>Preferred Stops:</strong> {preferredRoute.map(stop => stop.area).join(", ")}</p>
+            <p><strong>Preferred Stops:</strong> {preferredRoute.map(stop => stop.label).join(", ")}</p>
           )}
+
         </section>
       </div>
     </div>

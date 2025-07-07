@@ -40,8 +40,11 @@ function DriverRides() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {rides.map(({ id, ride }) => {
-            const from = ride.route[0]?.location?.area || "Start";
-            const to = ride.route[ride.route.length - 1]?.location?.area || "End";
+            const from = ride.route[0]?.location?.label || "Start";
+            const to = ride.route[ride.route.length - 1]?.location?.label || "End";
+
+            // console.log(from+" "+to);
+
 
             return (
               <div

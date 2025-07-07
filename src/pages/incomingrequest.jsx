@@ -70,21 +70,22 @@ function IncomingRequests() {
                       : `${bookingRequest.rider.firstName.charAt(0)}.`}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">
-                    From: <strong>{bookingRequest.pickup.area}</strong>, {bookingRequest.pickup.city}
+                    From: <strong>{bookingRequest.pickup.label}</strong>
                     <br />
-                    To: <strong>{bookingRequest.destination.area}</strong>, {bookingRequest.destination.city}
+                    To: <strong>{bookingRequest.destination.label}</strong>
                   </p>
                   {bookingRequest.preferredRoute?.length > 0 && (
                     <p className="text-sm text-gray-500 mt-1">
                       Preferred Stops:{" "}
                       {bookingRequest.preferredRoute.map((stop, i) => (
                         <span key={i}>
-                          {stop.area}
+                          {stop.label}
                           {i < bookingRequest.preferredRoute.length - 1 ? ", " : ""}
                         </span>
                       ))}
                     </p>
                   )}
+
                 </div>
 
                 <div>

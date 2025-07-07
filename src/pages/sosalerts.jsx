@@ -55,8 +55,8 @@ function SosAlerts() {
                   {booking && (
                     <>
                       <div className="text-sm text-gray-800 mb-2">
-                        <p><strong>Pickup:</strong> {booking.pickup.area}</p>
-                        <p><strong>Drop:</strong> {booking.destination.area}</p>
+                        <p><strong>Pickup:</strong> {booking.pickup.lable}</p>
+                        <p><strong>Drop:</strong> {booking.destination.lable}</p>
                         <p><strong>Status:</strong> {booking.approved ? "APPROVED" : "PENDING"}</p>
                       </div>
 

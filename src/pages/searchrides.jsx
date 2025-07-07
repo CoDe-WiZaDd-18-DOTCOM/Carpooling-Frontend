@@ -1,65 +1,66 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Search } from "lucide-react";
+import LocationSearchInput from "./LocationSearchInput";
 
 function SearchRides() {
   const [searchData, setSearchData] = useState({
-    pickup: { area: "", city: "", landmark: "" },
-    drop: { area: "", city: "", landmark: "" },
+    pickup: null,
+    drop: null,
     preferredRoute: [],
   });
 
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [sortConfig, setSortConfig] = useState({
-    key: null,
-    direction: "asc",
-  });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
-  const handlePickupDropChange = (type, field, value) => {
-    setSearchData((prev) => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        [field]: value,
-      },
-    }));
+  const updateLocation = (field, value) => {
+    setSearchData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handlePreferredRouteChange = (index, field, value) => {
+  const updatePreferredStop = (index, value) => {
     const updated = [...searchData.preferredRoute];
-    if (!updated[index]) updated[index] = { area: "", city: "", landmark: "" };
-    updated[index][field] = value;
-    setSearchData({ ...searchData, preferredRoute: updated });
+    updated[index] = value;
+    setSearchData((prev) => ({ ...prev, preferredRoute: updated }));
   };
 
   const addPreferredStop = () => {
-    setSearchData({
-      ...searchData,
-      preferredRoute: [...searchData.preferredRoute, { area: "", city: "", landmark: "" }],
-    });
+    setSearchData((prev) => ({
+      ...prev,
+      preferredRoute: [...prev.preferredRoute, null],
+    }));
   };
 
   const handleSearch = async () => {
+    if (!searchData.pickup || !searchData.drop) {
+      alert("Please select both pickup and drop locations.");
+      return;
+    }
+
     try {
       setIsLoading(true);
       setHasSearched(true);
       const token = localStorage.getItem("AuthToken");
+      console.log("Sending search data:", {
+        pickup: searchData.pickup,
+        drop: searchData.drop,
+        preferredRoute: searchData.preferredRoute.filter((stop) => stop !== null),
+      });
+
 
       const response = await axios.post(
         "http://localhost:5001/rides/search",
         {
           pickup: searchData.pickup,
           drop: searchData.drop,
-          prefferedRoute: searchData.preferredRoute,
+          preferredRoute: searchData.preferredRoute.filter((stop) => stop !== null),
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       setResults(response.data);
     } catch (error) {
       console.error("Search error:", error);
@@ -71,13 +72,11 @@ function SearchRides() {
 
   const handleRequestRide = async (rideId) => {
     try {
-      const res = await axios.post(
+      await axios.post(
         `http://localhost:5001/bookings/${rideId}/create-request`,
         searchData,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
         }
       );
       alert("Request sent successfully!");
@@ -97,12 +96,10 @@ function SearchRides() {
 
   const sortedResults = [...results].sort((a, b) => {
     if (!sortConfig.key) return 0;
-
-    const mapTime = (timeStr) => {
-        const [hr,min,sec] = timeStr.split(":").map(Number);
-        return hr*3600+min*60+sec;
-    }
-
+    const mapTime = (t) => {
+      const [h, m, s] = t.split(":").map(Number);
+      return h * 3600 + m * 60 + s;
+    };
     const valA = sortConfig.key === "arrivalTime"
       ? mapTime(a.routeMatchResult.arrivalTime)
       : a.routeMatchResult.score;
@@ -116,55 +113,35 @@ function SearchRides() {
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-20">
       <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Find a Ride</h2>
 
-      {/* Search Form */}
       <div className="bg-white shadow-lg rounded-xl p-8 mb-10">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Pickup & Drop</h3>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Pickup */}
           <div>
-            {["area", "city", "landmark"].map((field, idx) => (
-              <div key={idx} className="mb-2">
-                <label className="block text-sm text-gray-700 capitalize">{field}</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded"
-                  value={searchData.pickup[field]}
-                  onChange={(e) => handlePickupDropChange("pickup", field, e.target.value)}
-                />
-              </div>
-            ))}
+            <label className="block text-sm text-gray-700 mb-1">Pickup Location</label>
+            <LocationSearchInput
+              onSelect={(loc) => updateLocation("pickup", loc)}
+              placeholder="Search pickup location..."
+            />
           </div>
-          {/* Drop */}
           <div>
-            {["area", "city", "landmark"].map((field, idx) => (
-              <div key={idx} className="mb-2">
-                <label className="block text-sm text-gray-700 capitalize">{field}</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded"
-                  value={searchData.drop[field]}
-                  onChange={(e) => handlePickupDropChange("drop", field, e.target.value)}
-                />
-              </div>
-            ))}
+            <label className="block text-sm text-gray-700 mb-1">Drop Location</label>
+            <LocationSearchInput
+              onSelect={(loc) => updateLocation("drop", loc)}
+              placeholder="Search drop location..."
+            />
           </div>
         </div>
 
         {/* Preferred Stops */}
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-2">Preferred Stops (Optional)</h3>
-          {searchData.preferredRoute.map((stop, idx) => (
-            <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {["area", "city", "landmark"].map((field) => (
-                <input
-                  key={field}
-                  type="text"
-                  placeholder={field}
-                  value={stop[field]}
-                  onChange={(e) => handlePreferredRouteChange(idx, field, e.target.value)}
-                  className="p-2 border rounded"
-                />
-              ))}
+          {searchData.preferredRoute.map((_, idx) => (
+            <div key={idx} className="mb-4">
+              <LocationSearchInput
+                onSelect={(loc) => updatePreferredStop(idx, loc)}
+                placeholder={`Preferred Stop ${idx + 1}`}
+              />
             </div>
           ))}
           <button
@@ -176,7 +153,6 @@ function SearchRides() {
           </button>
         </div>
 
-        {/* Search Button */}
         <div className="mt-8 text-center">
           <button
             onClick={handleSearch}
@@ -191,7 +167,7 @@ function SearchRides() {
       {/* Results */}
       {isLoading ? (
         <div className="text-center py-10">
-          <div className="animate-spin h-10 w-10 rounded-full border-4 border-emerald-500 border-t-transparent mx-auto"></div>
+          <div className="animate-spin h-10 w-10 border-4 border-emerald-500 border-t-transparent mx-auto rounded-full"></div>
           <p className="mt-4 text-gray-600">Searching for rides...</p>
         </div>
       ) : hasSearched && results.length === 0 ? (
@@ -224,9 +200,7 @@ function SearchRides() {
                         <img
                           src={`data:image/jpeg;base64,${ride.rideSearchDto.driver.profileImageBase64}`}
                           alt="Driver"
-                          className={`w-10 h-10 rounded-full object-cover border ${
-                            ride.status === "APPROVED" ? "" : "blur-sm"
-                          }`}
+                          className="w-10 h-10 rounded-full object-cover border"
                         />
                       )}
                       <span>
