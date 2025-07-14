@@ -19,6 +19,11 @@ import RideDetails from "./pages/ridedetails";
 import SosAlerts from "./pages/sosalerts";
 import OAuthSuccess from "./pages/OAuthSuccess";
 import AddAuthorities from "./pages/AddAUthorites";
+import DashboardAdmin from "./pages/dashboard_admin";
+import AdminUsers from "./pages/AdminUsers.jsx";
+import AdminRides from "./pages/AdminRides.jsx";
+import AdminAnalytics from "./pages/AdminAnalytics.jsx";
+
 
 export const AuthContext = createContext();
 function App() {
@@ -48,7 +53,12 @@ function App() {
         <Route path="/driver-rides" element={<DriverRides />} />
         <Route path="/alerts" element={<SosAlerts />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
-        <Route path="/add-authorities" element={<AddAuthorities />} />
+        <Route path="/admin/authorities" element={<AddAuthorities />} />
+        <Route path="/admin" element={<DashboardAdmin />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/rides" element={<AdminRides />} />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        {/* Add other admin routes here */}
       </Routes>
     </Router>
     </MantineProvider>

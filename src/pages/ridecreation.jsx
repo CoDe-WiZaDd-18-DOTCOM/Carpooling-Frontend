@@ -6,6 +6,7 @@ import LocationSearchInput from "./LocationSearchInput";
 const RideCreate = () => {
   const [route, setRoute] = useState([{ location: null, arrivalTime: "" }]);
   const [seatCapacity, setSeatCapacity] = useState(1);
+  const [city,setCity] = useState("");
   const [vehicle, setVehicle] = useState({
     model: "",
     brand: "",
@@ -73,7 +74,10 @@ const RideCreate = () => {
             {route.map((stop, index) => (
               <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <LocationSearchInput
-                  onSelect={(loc) => updateRouteStop(index, "location", loc)}
+                  onSelect={(loc,city) => {
+                    updateRouteStop(index, "location", loc);
+                    if(index===0) setCity(city);
+                  }}
                 />
 
                 <input

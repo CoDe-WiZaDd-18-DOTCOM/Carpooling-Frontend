@@ -29,13 +29,22 @@ const LocationSearchInput = ({ onSelect }) => {
   };
 
   const handleSelect = (place) => {
+    const address = place.address || {};
+
+    const city =
+      address.city ||
+      address.town ||
+      address.village ||
+      address.state_district ||
+      address.state;
+
     const location = {
       label: place.display_name,
       lat: parseFloat(place.lat),
       lon: parseFloat(place.lon),
     };
 
-    onSelect(location);
+    onSelect(location,city);
     setQuery(place.display_name);
     setSuggestions([]);
   };

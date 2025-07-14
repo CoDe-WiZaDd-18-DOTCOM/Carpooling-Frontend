@@ -33,7 +33,8 @@ function Login() {
             });
             localStorage.setItem("AuthToken",response.data.jwtToken);
             localStorage.setItem("role",response.data.role);
-            navigate("/Dashboard");
+            if(response.data.role==="ADMIN") navigate("/admin");
+            else navigate("/Dashboard");
         }
         else if( response.status == 403) {
             notifications.show({    
