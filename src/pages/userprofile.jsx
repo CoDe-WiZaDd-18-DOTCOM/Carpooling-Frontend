@@ -6,6 +6,8 @@ function UserProfile() {
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
+  const [averageRating, setAverageRating] = useState(null);
+  const [ratingCount,setRatingCount] = useState(0);
 
   const fetchUser = async () => {
     try {
@@ -14,10 +16,33 @@ function UserProfile() {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
       });
+      console.log(res.data);
       setUser(res.data);
       setForm(res.data);
+      // fetchAverageRating(res.data.email); // Fetch rating after user is loaded
+      setAverageRating(res.data.rating);
+      setRatingCount(res.data.ratingCount);
     } catch (err) {
       console.error("Error fetching profile", err);
+    }
+  };
+
+  const fetchAverageRating = async (email) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5001/reviews/average-rating",
+        {email},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(res.data);
+      setAverageRating(res.data);
+    } catch (err) {
+      console.error("Error fetching average rating", err);
     }
   };
 
@@ -71,7 +96,45 @@ function UserProfile() {
   return (
     <div className="max-w-4xl mx-auto p-6 mt-12 bg-white shadow-lg rounded-xl">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-emerald-600">My Profile</h2>
+        <div>
+          <h2 className="text-3xl font-bold text-emerald-600">My Profile</h2>
+          {averageRating !== null && ratingCount!==0 &&(
+            <div className="mt-1 flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <span key={i} className={`text-xl ${i <= Math.round(averageRating) ? "text-yellow-400" : "text-gray-300"}`}>
+                    ★
+                  </span>
+                ))}
+              </div>
+              <span className="text-sm text-gray-600">
+                {averageRating} / 5
+              </span>
+              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                averageRating >= 4.5
+                  ? "bg-green-100 text-green-700"
+                  : averageRating >= 3.5
+                  ? "bg-emerald-100 text-emerald-700"
+                  : averageRating >= 2.5
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
+              }`}>
+                {averageRating >= 4.5
+                  ? "Excellent"
+                  : averageRating >= 3.5
+                  ? "Good"
+                  : averageRating >= 2.5
+                  ? "Average"
+                  : "Poor"}
+              </span>
+            </div>
+          )}
+
+          {ratingCount===0 && (
+            <p>user is not yet rated</p>
+          )}
+
+        </div>
         <button
           onClick={() => window.location.href = "/dashboard"}
           className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:from-emerald-600 hover:to-emerald-700 transition"

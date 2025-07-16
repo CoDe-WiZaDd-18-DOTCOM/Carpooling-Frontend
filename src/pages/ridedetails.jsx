@@ -9,6 +9,8 @@ function RideDetails() {
   const [bookings, setBookings] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
   const [approvingId, setApprovingId] = useState(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [riderReviews, setRiderReviews] = useState({});
 
   useEffect(() => {
     const fetchRideData = async () => {
@@ -32,18 +34,89 @@ function RideDetails() {
     fetchRideData();
   }, [id]);
 
-  const handleCloseRide = async () => {
+  const handleCloseRide = () => {
+    const initialReviews = {};
+    bookings.forEach(({ bookingRequest }) => {
+      const email = bookingRequest.rider.email;
+      initialReviews[email] = { rating: 5, comment: "" };
+    });
+    setRiderReviews(initialReviews);
+    setShowReviewForm(true);
+  };
+
+  const updateReviewField = (email, field, value) => {
+    setRiderReviews((prev) => ({
+      ...prev,
+      [email]: {
+        ...prev[email],
+        [field]: value,
+      },
+    }));
+  };
+
+  const submitAllReviewsAndCloseRide = async () => {
+    const token = localStorage.getItem("AuthToken");
+
     try {
       setIsClosing(true);
-      const token = localStorage.getItem("AuthToken");
-      const rideRes = await axios.post(`http://localhost:5001/rides/close-ride/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      for (const email of Object.keys(riderReviews)) {
+        const { rating, comment } = riderReviews[email];
+        if (comment.trim() || rating !== 5) {
+          await axios.post(
+            "http://localhost:5001/reviews/submit",
+            {
+              revieweeEmail: email,
+              rating,
+              comment,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        }
+      }
+
+      const rideRes = await axios.post(
+        `http://localhost:5001/rides/close-ride/${id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       setRide(rideRes.data);
+      setShowReviewForm(false);
+      alert("✅ Ride closed and reviews submitted.");
     } catch (error) {
-      console.error("Failed to close ride:", error);
+      console.error("Error during review/close:", error);
+      alert("❌ Failed to submit reviews or close ride.");
     } finally {
       setIsClosing(false);
+    }
+  };
+
+  const handleApprove = async (bookingId) => {
+    try {
+      setApprovingId(bookingId);
+      await axios.post(`http://localhost:5001/bookings/${bookingId}/approve`, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+        },
+      });
+
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === bookingId ? { ...b, bookingRequest: { ...b.bookingRequest, approved: true } } : b
+        )
+      );
+    } catch (error) {
+      console.error("Failed to approve booking:", error);
+      alert("Something went wrong while approving. Try again.");
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -96,7 +169,6 @@ function RideDetails() {
             </p>
           </div>
 
-          {/* Ride Preferences */}
           <div className="mt-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-1">Ride Preferences</h4>
             <div className="flex flex-wrap gap-2 text-xs">
@@ -108,15 +180,13 @@ function RideDetails() {
             </div>
           </div>
 
-
-          {ride.status !== "CLOSED" && (
+          {ride.status !== "CLOSED" && !showReviewForm && (
             <div className="mt-8 text-right">
               <button
                 onClick={handleCloseRide}
-                disabled={isClosing}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow font-semibold disabled:opacity-50"
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow font-semibold"
               >
-                {isClosing ? "Closing..." : "Close Ride"}
+                Close Ride
               </button>
               <p className="text-xs text-gray-500 mt-1">Click after ride is complete.</p>
             </div>
@@ -136,29 +206,6 @@ function RideDetails() {
                 const status = approved ? "APPROVED" : "PENDING";
                 const statusColor = approved ? "text-green-600" : "text-yellow-600";
 
-                const handleApprove = async (bookingId) => {
-                  try {
-                    setApprovingId(bookingId); // 🆕
-                    await axios.post(`http://localhost:5001/bookings/${bookingId}/approve`, {}, {
-                      headers: {
-                        Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-                      },
-                    });
-
-                    setBookings((prev) =>
-                      prev.map((b) =>
-                        b.id === bookingId ? { ...b, bookingRequest: { ...b.bookingRequest, approved: true } } : b
-                      )
-                    );
-                  } catch (error) {
-                    console.error("Failed to approve booking:", error);
-                    alert("Something went wrong while approving. Try again.");
-                  } finally {
-                    setApprovingId(null); 
-                  }
-                };
-
-
                 return (
                   <div
                     key={bookingId}
@@ -168,9 +215,7 @@ function RideDetails() {
                       <img
                         src={`data:image/jpeg;base64,${rider.profileImageBase64}`}
                         alt="Rider"
-                        className={`w-14 h-14 rounded-full object-cover border ${
-                          approved ? "" : "blur-sm"
-                        }`}
+                        className={`w-14 h-14 rounded-full object-cover border ${approved ? "" : "blur-sm"}`}
                       />
                     )}
 
@@ -180,24 +225,6 @@ function RideDetails() {
                       </h4>
                       <p className="text-sm text-gray-600">📧 {rider.email}</p>
                       <p className="text-sm text-gray-600">📞 {rider.phoneNumber}</p>
-
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                        <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
-                          🎵 Music: {rider.preferences.music}
-                        </span>
-                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                          ❄️ AC: {rider.preferences.ac}
-                        </span>
-                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                          🚬 Smoking: {rider.preferences.smoking}
-                        </span>
-                        <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
-                          🐾 Pet-Friendly: {rider.preferences.petFriendly}
-                        </span>
-                        <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                          🚻 Gender: {rider.preferences.genderBased}
-                        </span>
-                      </div>
                     </div>
 
                     <div className="flex flex-col items-center gap-2">
@@ -211,15 +238,106 @@ function RideDetails() {
                           {approvingId === bookingId ? "Approving..." : "Approve"}
                         </button>
                       )}
-
                     </div>
                   </div>
                 );
               })}
-
             </div>
           )}
         </div>
+
+        {/* Rider Review Form */}
+        {showReviewForm && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="bg-white max-h-[90vh] overflow-y-auto w-full max-w-3xl rounded-xl shadow-xl p-6 relative">
+      <h3 className="text-3xl font-extrabold text-emerald-700 mb-6 text-center">
+        📝 Rider Vibe Check
+      </h3>
+
+      <div className="space-y-8">
+        {bookings.map(({ bookingRequest }) => {
+          const rider = bookingRequest.rider;
+          const review = riderReviews[rider.email] || { rating: 5, comment: "" };
+
+          return (
+            <div key={rider.email} className="border border-gray-200 p-5 rounded-xl bg-gray-50 shadow-sm">
+              <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                {rider.firstName} {rider.lastName}{" "}
+                <span className="text-sm text-gray-500">({rider.email})</span>
+              </h4>
+
+              <div className="mb-4">
+                <label className="block text-sm font-bold text-emerald-700 mb-1">
+                  🌟 How would you rate their vibe?
+                </label>
+                <div className="flex gap-4 items-center">
+                  {[1, 2, 3, 4, 5].map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => updateReviewField(rider.email, "rating", val)}
+                      className={`text-2xl transition-all duration-150 ${
+                        review.rating === val ? "scale-125 text-emerald-600" : "opacity-50"
+                      }`}
+                    >
+                      {["😡", "😕", "😐", "😊", "🤩"][val - 1]}
+                    </button>
+                  ))}
+                  <span className="text-sm text-emerald-600 ml-2">
+                    {["Terrible", "Bad", "Okay", "Great", "Awesome"][review.rating - 1]}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-emerald-700 mb-1">
+                  💬 Comment (optional)
+                </label>
+                <textarea
+                  rows="3"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 bg-white text-sm text-gray-800"
+                  placeholder="Anything you’d like to share about this rider?"
+                  value={review.comment}
+                  onChange={(e) => updateReviewField(rider.email, "comment", e.target.value)}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Modal Footer Buttons */}
+      <div className="flex flex-col md:flex-row gap-4 justify-center mt-8">
+        <button
+          onClick={submitAllReviewsAndCloseRide}
+          disabled={isClosing}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-60"
+        >
+          {isClosing ? "Closing..." : "Submit & Close Ride 🚘"}
+        </button>
+        <button
+          onClick={() => setShowReviewForm(false)}
+          className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-2 rounded-full font-semibold transition-all"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <p className="text-xs text-center text-gray-400 mt-3">
+        Your feedback helps improve the community 🛣️💬
+      </p>
+
+      {/* Close X Button */}
+      <button
+        onClick={() => setShowReviewForm(false)}
+        className="absolute top-3 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
+        aria-label="Close"
+      >
+        ×
+      </button>
+    </div>
+  </div>
+)}
+
       </div>
     </div>
   );
