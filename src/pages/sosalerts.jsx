@@ -4,19 +4,31 @@ import axios from "axios";
 function SosAlerts() {
   const [alerts, setAlerts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const token = localStorage.getItem("AuthToken");
+  const role = localStorage.getItem("role");
 
   const fetchAlerts = async () => {
     try {
       const res = await axios.get("http://localhost:5001/sos/alerts", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setAlerts(res.data);
     } catch (err) {
       console.error("Error fetching SOS alerts:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const markAsResolved = async (id) => {
+    try {
+      await axios.post(`http://localhost:5001/sos/close/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("SOS alert marked as resolved.");
+      fetchAlerts();
+    } catch (err) {
+      console.error("Error marking alert as resolved:", err);
     }
   };
 
@@ -37,26 +49,29 @@ function SosAlerts() {
         <p className="text-center text-gray-600">No alerts received yet.</p>
       ) : (
         <div className="space-y-6">
-          {alerts.map((alert) => {
+          {alerts.map((wrapper) => {
+            const alert = wrapper.sosAlerts;
             const booking = alert.bookingRequest;
-            const rider = alert.user;
+            const rider = booking?.rider;
             const driver = booking?.driver;
 
             return (
               <div
-                key={alert.id}
+                key={wrapper.id}
                 className="bg-white p-6 rounded-xl shadow border border-red-100 flex flex-col md:flex-row justify-between"
               >
                 {/* Left Side - Alert and Booking Info */}
                 <div className="md:w-2/3">
                   <h3 className="text-xl font-semibold text-red-600 mb-2">Alert Message</h3>
-                  <p className="text-gray-700 italic mb-4">"{alert.message || 'No message provided'}"</p>
+                  <p className="text-gray-700 italic mb-2">"{alert.message || 'No message provided'}"</p>
+
+                  <p className="text-sm font-semibold mb-4">Status: <span className={alert.status === 'PENDING' ? 'text-orange-500' : 'text-green-600'}>{alert.status}</span></p>
 
                   {booking && (
                     <>
                       <div className="text-sm text-gray-800 mb-2">
-                        <p><strong>Pickup:</strong> {booking.pickup.area}</p>
-                        <p><strong>Drop:</strong> {booking.destination.area}</p>
+                        <p><strong>Pickup:</strong> {booking.pickup.label}</p>
+                        <p><strong>Drop:</strong> {booking.destination.label}</p>
                         <p><strong>Status:</strong> {booking.approved ? "APPROVED" : "PENDING"}</p>
                       </div>
 
@@ -70,6 +85,16 @@ function SosAlerts() {
                         </p>
                       </div>
                     </>
+                  )}
+
+                  {/* Mark as Resolved Button */}
+                  {role === "ADMIN" && alert.status === "PENDING" && (
+                    <button
+                      onClick={() => markAsResolved(wrapper.id)}
+                      className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded shadow"
+                    >
+                      ✅ Mark as Resolved
+                    </button>
                   )}
                 </div>
 

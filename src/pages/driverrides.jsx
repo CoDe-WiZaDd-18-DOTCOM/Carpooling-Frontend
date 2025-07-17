@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 
 function DriverRides() {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,21 @@ function DriverRides() {
     fetchRides();
   }, []);
 
+  const handleDelete = async (rideId) => {
+    try {
+      await axios.delete(`http://localhost:5001/rides/delete/${rideId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+        },
+      });
+      setRides((prev) => prev.filter((r) => r.id !== rideId));
+      setConfirmDeleteId(null);
+    } catch (err) {
+      console.error("Failed to delete ride:", err);
+      alert("Failed to delete ride. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white py-12 px-6 md:px-20">
       <h2 className="text-4xl font-bold text-emerald-700 mb-10 text-center">My Created Rides</h2>
@@ -40,22 +56,41 @@ function DriverRides() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {rides.map(({ id, ride }) => {
-            const from = ride.route[0]?.location?.area || "Start";
-            const to = ride.route[ride.route.length - 1]?.location?.area || "End";
+            const from = ride.route[0]?.location?.label || "Start";
+            const to = ride.route[ride.route.length - 1]?.location?.label || "End";
 
             return (
               <div
                 key={id}
-                className="bg-white border border-emerald-100 shadow hover:shadow-lg rounded-2xl p-6 transition-transform hover:scale-[1.01] cursor-pointer"
+                className="bg-white border border-emerald-100 shadow hover:shadow-lg rounded-2xl p-6 transition-transform hover:scale-[1.01] cursor-pointer relative"
                 onClick={() => navigate(`/ride-details/${id}`)}
               >
+                <div className="absolute top-3 right-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirmDeleteId(id);
+                    }}
+                    title="Delete Ride"
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+
                 <div className="flex flex-col gap-2">
                   <h3 className="text-xl font-semibold text-gray-800">
                     {from} <span className="text-emerald-600">➝</span> {to}
                   </h3>
                   <div className="text-sm text-gray-500">
-                    <p>Seats: <span className="font-medium text-gray-700">{ride.availableSeats} / {ride.seatCapacity}</span></p>
-                    <p>Status: 
+                    <p>
+                      Seats:{" "}
+                      <span className="font-medium text-gray-700">
+                        {ride.availableSeats} / {ride.seatCapacity}
+                      </span>
+                    </p>
+                    <p>
+                      Status:
                       <span
                         className={`ml-2 font-semibold ${
                           ride.status === "ACTIVE"
@@ -84,6 +119,41 @@ function DriverRides() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white w-[90%] max-w-md p-6 rounded-xl shadow-xl relative">
+            <button
+              onClick={() => setConfirmDeleteId(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            >
+              ✖
+            </button>
+            <div className="flex items-center gap-3">
+              <span className="text-yellow-500 text-xl">⚠️</span>
+              <h3 className="text-xl font-semibold text-gray-800">Confirm Deletion</h3>
+            </div>
+            <p className="text-gray-600 mt-2">
+              Are you sure you want to delete this ride? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDeleteId)}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
