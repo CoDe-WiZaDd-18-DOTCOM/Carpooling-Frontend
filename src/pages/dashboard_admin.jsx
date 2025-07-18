@@ -8,8 +8,10 @@ import {
   BarChart3,
   UserCircle,
   LogOut,
+  MessageCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Bar } from "recharts";
 
 function DashboardAdmin() {
   const navigate = useNavigate();
@@ -49,6 +51,12 @@ function DashboardAdmin() {
       title: "Reports & Analytics",
       description: "Visual stats on rides, users, and alerts.",
       route: "/admin/analytics",
+    },
+    {
+      icon: <MessageCircle className="text-emerald-600" />,
+      title: "Filed Emails Monitoring",
+      description: "View and resolve Filed emails.",
+      route: "/admin/emails",
     },
   ];
 

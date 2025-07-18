@@ -23,6 +23,7 @@ import DashboardAdmin from "./pages/dashboard_admin";
 import AdminUsers from "./pages/AdminUsers.jsx";
 import AdminRides from "./pages/AdminRides.jsx";
 import AdminAnalytics from "./pages/AdminAnalytics.jsx";
+import FailedEmailsAdmin from "./pages/FailedEmails.jsx";
 
 
 export const AuthContext = createContext();
@@ -58,7 +59,7 @@ function App() {
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/rides" element={<AdminRides />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        {/* Add other admin routes here */}
+        <Route path="/admin/emails" element={<FailedEmailsAdmin />} />
       </Routes>
     </Router>
     </MantineProvider>
