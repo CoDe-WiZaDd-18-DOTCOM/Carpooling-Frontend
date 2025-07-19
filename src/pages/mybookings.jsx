@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Trash2, X, AlertTriangle } from "lucide-react";
 
+
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
 
   const fetchMyBookings = async () => {
     try {
@@ -22,9 +24,11 @@ function MyBookings() {
     }
   };
 
+
   useEffect(() => {
     fetchMyBookings();
   }, []);
+
 
   const handleDelete = async (id) => {
     try {
@@ -41,23 +45,28 @@ function MyBookings() {
     }
   };
 
+
   const maskEmail = (email) => {
     const [name, domain] = email.split("@");
     if (name.length <= 1) return `*@${domain}`;
     return `${name[0]}${"*".repeat(name.length - 1)}@${domain}`;
   };
 
+
   const maskPhone = (phone) => {
     if (phone.length < 4) return "XXXXXXX0000";
     return `XXXXXX${phone.slice(-4)}`;
   };
 
+
   if (loading)
     return <div className="text-center text-gray-500 mt-10">Loading your bookings...</div>;
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-20 relative">
       <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">My Ride Requests</h2>
+
 
       {bookings.length === 0 ? (
         <p className="text-center text-gray-500 text-lg">No ride requests sent yet.</p>
@@ -65,6 +74,7 @@ function MyBookings() {
         <div className="grid gap-6">
           {bookings.map(({ id, bookingRequest }) => {
             const { driver, pickup, destination, approved } = bookingRequest;
+
 
             return (
               <div
@@ -83,6 +93,7 @@ function MyBookings() {
                   </div>
                 )}
 
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800">
@@ -96,6 +107,7 @@ function MyBookings() {
                       {approved ? driver.phoneNumber : maskPhone(driver.phoneNumber)}
                     </p>
                   </div>
+
 
                   <div className="flex flex-col gap-2">
                     {approved ? (
@@ -120,6 +132,7 @@ function MyBookings() {
           })}
         </div>
       )}
+
 
       {/* Custom Confirmation Modal */}
       {confirmDeleteId && (
@@ -158,5 +171,6 @@ function MyBookings() {
     </div>
   );
 }
+
 
 export default MyBookings;
