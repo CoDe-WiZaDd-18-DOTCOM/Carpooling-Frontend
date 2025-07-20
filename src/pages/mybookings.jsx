@@ -1,22 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Trash2, X, AlertTriangle } from "lucide-react";
+import { Trash2, X, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 
 
 function MyBookings() {
-  const [bookings, setBookings] = useState([]);
+  const [bookingsPage, setBookingsPage] = useState(null); // Will hold {content, totalPages, ...}
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const PAGE_SIZE = 5;
+  const bookings = bookingsPage?.content || [];
+  const totalPages = bookingsPage?.totalPages || 1;
 
 
-  const fetchMyBookings = async () => {
+
+
+  const fetchMyBookings = async (currPage = page) => {
+    setLoading(true);
     try {
       const res = await axios.get("http://localhost:5001/bookings/me", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-        },
+        params: { page: currPage, size: PAGE_SIZE },
+        headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
       });
-      setBookings(res.data);
+      console.log(res.data);
+      setBookingsPage(res.data);
     } catch (err) {
       console.error("Error fetching bookings:", err);
     } finally {
@@ -25,25 +32,25 @@ function MyBookings() {
   };
 
 
+
   useEffect(() => {
-    fetchMyBookings();
-  }, []);
+    fetchMyBookings(page);
+  }, [page]);
 
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/bookings/delete/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
       });
-      setBookings((prev) => prev.filter((b) => b.id !== id));
+      fetchMyBookings(page);
       setConfirmDeleteId(null);
     } catch (err) {
       console.error("Failed to delete booking:", err);
       alert("Failed to cancel booking. Please try again.");
     }
   };
+
 
 
   const maskEmail = (email) => {
@@ -132,6 +139,40 @@ function MyBookings() {
           })}
         </div>
       )}
+
+      {/* pagination */}
+      {bookingsPage && totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
+          <button
+            disabled={page === 0}
+            onClick={() => setPage(page - 1)}
+            className="px-3 py-1 rounded border disabled:opacity-50"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i)}
+              className={`px-3 py-1 rounded border ${
+                page === i ? "bg-emerald-500 text-white" : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={page + 1 >= totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-3 py-1 rounded border disabled:opacity-50"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+
 
 
       {/* Custom Confirmation Modal */}
