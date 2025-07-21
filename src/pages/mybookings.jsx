@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Trash2, X, AlertTriangle } from "lucide-react";
+import { Trash2, X, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+
 
 function MyBookings() {
-  const [bookings, setBookings] = useState([]);
+  const [bookingsPage, setBookingsPage] = useState(null); // Will hold {content, totalPages, ...}
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const PAGE_SIZE = 5;
+  const bookings = bookingsPage?.content || [];
+  const totalPages = bookingsPage?.totalPages || 1;
 
-  const fetchMyBookings = async () => {
+
+
+
+  const fetchMyBookings = async (currPage = page) => {
+    setLoading(true);
     try {
       const res = await axios.get("http://localhost:5001/bookings/me", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-        },
+        params: { page: currPage, size: PAGE_SIZE },
+        headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
       });
-      setBookings(res.data);
+      console.log(res.data);
+      setBookingsPage(res.data);
     } catch (err) {
       console.error("Error fetching bookings:", err);
     } finally {
@@ -22,18 +31,19 @@ function MyBookings() {
     }
   };
 
+
+
   useEffect(() => {
-    fetchMyBookings();
-  }, []);
+    fetchMyBookings(page);
+  }, [page]);
+
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/bookings/delete/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
       });
-      setBookings((prev) => prev.filter((b) => b.id !== id));
+      fetchMyBookings(page);
       setConfirmDeleteId(null);
     } catch (err) {
       console.error("Failed to delete booking:", err);
@@ -41,23 +51,29 @@ function MyBookings() {
     }
   };
 
+
+
   const maskEmail = (email) => {
     const [name, domain] = email.split("@");
     if (name.length <= 1) return `*@${domain}`;
     return `${name[0]}${"*".repeat(name.length - 1)}@${domain}`;
   };
 
+
   const maskPhone = (phone) => {
     if (phone.length < 4) return "XXXXXXX0000";
     return `XXXXXX${phone.slice(-4)}`;
   };
 
+
   if (loading)
     return <div className="text-center text-gray-500 mt-10">Loading your bookings...</div>;
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-20 relative">
       <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">My Ride Requests</h2>
+
 
       {bookings.length === 0 ? (
         <p className="text-center text-gray-500 text-lg">No ride requests sent yet.</p>
@@ -65,6 +81,7 @@ function MyBookings() {
         <div className="grid gap-6">
           {bookings.map(({ id, bookingRequest }) => {
             const { driver, pickup, destination, approved } = bookingRequest;
+
 
             return (
               <div
@@ -83,6 +100,7 @@ function MyBookings() {
                   </div>
                 )}
 
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800">
@@ -96,6 +114,7 @@ function MyBookings() {
                       {approved ? driver.phoneNumber : maskPhone(driver.phoneNumber)}
                     </p>
                   </div>
+
 
                   <div className="flex flex-col gap-2">
                     {approved ? (
@@ -120,6 +139,41 @@ function MyBookings() {
           })}
         </div>
       )}
+
+      {/* pagination */}
+      {bookingsPage && totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
+          <button
+            disabled={page === 0}
+            onClick={() => setPage(page - 1)}
+            className="px-3 py-1 rounded border disabled:opacity-50"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i)}
+              className={`px-3 py-1 rounded border ${
+                page === i ? "bg-emerald-500 text-white" : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={page + 1 >= totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-3 py-1 rounded border disabled:opacity-50"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+
+
 
       {/* Custom Confirmation Modal */}
       {confirmDeleteId && (
@@ -158,5 +212,6 @@ function MyBookings() {
     </div>
   );
 }
+
 
 export default MyBookings;
