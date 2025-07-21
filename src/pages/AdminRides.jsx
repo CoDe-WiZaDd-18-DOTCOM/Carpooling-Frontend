@@ -163,16 +163,29 @@ function AdminRides() {
                       {new Date(r.ride.createdAt).toLocaleString()}
                     </td>
                     <td className="px-4 py-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteRide(r.id);
-                        }}
-                        className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                      >
-                        <Trash2 size={14} /> Delete
-                      </button>
+                      <div className="flex gap-2">
+                        {r.ride.status=="OPEN" && (<button
+                          onClick={e => {
+                            e.stopPropagation();
+                            navigate(`/create/${r.id}`);
+                          }}
+                          className="flex items-center gap-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                          title="Update this ride"
+                        >
+                          Update
+                        </button>)}
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            deleteRide(r.id);
+                          }}
+                          className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </div>
                     </td>
+
                   </tr>
                 ))}
               </tbody>

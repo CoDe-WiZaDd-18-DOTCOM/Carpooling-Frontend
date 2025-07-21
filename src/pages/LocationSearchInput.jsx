@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const LocationSearchInput = ({ onSelect }) => {
-  const [query, setQuery] = useState("");
+const LocationSearchInput = ({ value, onSelect }) => {
+  const [query, setQuery] = useState(value?.label || "");
   const [suggestions, setSuggestions] = useState([]);
 
-  const fetchSuggestions = async (value) => {
-    setQuery(value);
-    if (value.length < 3) {
+  // Keep input in sync when parent changes value (like after fetching ride for edit)
+  useEffect(() => {
+    setQuery(value?.label || "");
+  }, [value]);
+
+  const fetchSuggestions = async (val) => {
+    setQuery(val);
+    if (val.length < 3) {
       setSuggestions([]);
       return;
     }
@@ -15,13 +20,12 @@ const LocationSearchInput = ({ onSelect }) => {
     try {
       const res = await axios.get("https://nominatim.openstreetmap.org/search", {
         params: {
-          q: value,
+          q: val,
           format: "json",
           addressdetails: 1,
           limit: 5,
         },
       });
-
       setSuggestions(res.data);
     } catch (error) {
       console.error("Error fetching suggestions:", error);
@@ -30,21 +34,18 @@ const LocationSearchInput = ({ onSelect }) => {
 
   const handleSelect = (place) => {
     const address = place.address || {};
-
     const city =
       address.city ||
       address.town ||
       address.village ||
       address.state_district ||
       address.state;
-
     const location = {
       label: place.display_name,
       lat: parseFloat(place.lat),
       lon: parseFloat(place.lon),
     };
-
-    onSelect(location,city);
+    onSelect(location, city);
     setQuery(place.display_name);
     setSuggestions([]);
   };

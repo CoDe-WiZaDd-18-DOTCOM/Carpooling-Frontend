@@ -45,6 +45,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path="/search" element={<SearchRides />} />
+        <Route path="/create/:rideId" element={<RideCreation />} />
         <Route path="/create" element={<RideCreation />} />
         <Route path="/incoming" element={<IncomingRequests />} />
         <Route path="/mybookings" element={<MyBookings />} />

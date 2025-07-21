@@ -3,13 +3,13 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Trash2, ChevronLeft , ChevronRight } from "lucide-react";
 
-const PAGE_SIZE = 4; // Or your choice
+const PAGE_SIZE = 4;
 
 function DriverRides() {
   const [ridesPage, setRidesPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [page, setPage] = useState(0); // zero-based page index
+  const [page, setPage] = useState(0); 
   const navigate = useNavigate();
 
   const fetchRides = async (currPage = page) => {
@@ -113,17 +113,29 @@ function DriverRides() {
                         </span>
                       </p>
                     </div>
-                    <div className="mt-4 text-right">
+                    <div className="mt-4 flex flex-row justify-end gap-3">
+                      {ride.status=="OPEN" && (<button
+                        onClick={e => {
+                          e.stopPropagation();
+                          navigate(`/create/${id}`);
+                        }}
+                        className="text-sm font-medium text-blue-600 hover:underline"
+                        title="Update this ride"
+                      >
+                        Update
+                      </button>)}
                       <button
                         onClick={e => {
                           e.stopPropagation();
                           navigate(`/ride-details/${id}`);
                         }}
                         className="text-sm font-medium text-emerald-600 hover:underline"
+                        title="View ride details"
                       >
                         View Details →
                       </button>
                     </div>
+
                   </div>
                 </div>
               );
