@@ -3,6 +3,7 @@ import {
   Car, User, LogOut, PlusCircle, Search, ClipboardList, CheckCircle, FileText
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ChatBotModal from "./ChatBotModel";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [recentBookings, setRecentBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("AuthToken");
@@ -123,61 +125,7 @@ function Dashboard() {
 
           
         </div>
-
-        {/* Recent Bookings Table
-        <section className="bg-white shadow-md rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Bookings</h3>
-          {bookingsLoading ? (
-              <p className="text-sm text-gray-500 animate-pulse">Loading recent bookings...</p>
-          ) : recentBookings.length === 0 ? (
-            <p className="text-sm text-gray-500">No recent bookings found.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto text-sm text-gray-700">
-                <thead>
-                  <tr className="bg-emerald-100 text-gray-700">
-                    <th className="px-4 py-2 text-left">Driver</th>
-                    <th className="px-4 py-2 text-left">Route</th>
-                    <th className="px-4 py-2 text-left">Status</th>
-                    <th className="px-4 py-2 text-left">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentBookings.map(({ id, bookingRequest }) => {
-                    const { driver, pickup, destination, approved } = bookingRequest;
-                    const status = approved ? "APPROVED" : "PENDING";
-
-                    return (
-                      <tr key={id} className="border-t hover:bg-gray-50">
-                        <td className="px-4 py-2">
-                          {driver.firstName} {driver.lastName}
-                        </td>
-                        <td className="px-4 py-2">
-                          {pickup.area} ➝ {destination.area}
-                        </td>
-                        <td className="px-4 py-2">{status}</td>
-                        <td className="px-4 py-2">
-                          {approved ? (
-                            <button
-                              onClick={() => navigate(`/my-bookings/${id}`)}
-                              className="bg-emerald-500 text-white px-3 py-1 rounded hover:bg-emerald-600 text-xs"
-                            >
-                              View
-                            </button>
-                          ) : (
-                            <span className="text-gray-400 text-xs">Pending</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-
-        </section> */}
+        
       </main>
     </div>
   );

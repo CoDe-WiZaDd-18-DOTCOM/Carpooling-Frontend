@@ -24,11 +24,13 @@ import AdminUsers from "./pages/AdminUsers.jsx";
 import AdminRides from "./pages/AdminRides.jsx";
 import AdminAnalytics from "./pages/AdminAnalytics.jsx";
 import FailedEmailsAdmin from "./pages/FailedEmails.jsx";
+import ChatBotModal from "./pages/ChatBotModel.jsx";
 
 
 export const AuthContext = createContext();
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("AuthToken");
@@ -63,6 +65,16 @@ function App() {
         <Route path="/admin/emails" element={<FailedEmailsAdmin />} />
       </Routes>
     </Router>
+    <button
+      onClick={() => setChatOpen(true)}
+      className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-700 shadow-xl flex items-center justify-center text-3xl hover:scale-105 transition-transform z-40 border-4 border-white"
+      aria-label="Open ChatBot"
+    >
+      <span role="img" aria-label="Robot Bot">🤖</span>
+    </button>
+
+        {/* Chatbot modal */}
+        <ChatBotModal open={chatOpen} onClose={() => setChatOpen(false)} />
     </MantineProvider>
   );
 }
