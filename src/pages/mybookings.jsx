@@ -31,6 +31,10 @@ function MyBookings() {
     }
   };
 
+  function truncateLabel(label) {
+    return label && label.length > 40 ? label.slice(0, 37) + "..." : label;
+  }
+
 
 
   useEffect(() => {
@@ -107,7 +111,7 @@ function MyBookings() {
                       Driver: {driver.firstName} {driver.lastName}
                     </h3>
                     <p className="text-gray-600">
-                      {pickup.label} ➝ {destination.label}
+                      {truncateLabel(pickup.label)} ➝ {truncateLabel(destination.label)}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       Email: {approved ? driver.email : maskEmail(driver.email)}, Phone:{" "}

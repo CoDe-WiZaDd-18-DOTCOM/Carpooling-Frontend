@@ -14,6 +14,7 @@ function Signup() {
     phoneNumber: "",
     password: "",
     role: "",
+    emergencyEmail: "",
     preferences: {
       music: "",
       smoking: "",
@@ -28,7 +29,7 @@ function Signup() {
   const [otpVerified, setOtpVerified] = useState(false);
   const [resendTimeout, setResendTimeout] = useState(0);
 
-  // Helper: Start resend cooldown timer (e.g., 30 seconds)
+  // Helper: resend OTP cooldown
   const startResendTimeout = () => {
     setResendTimeout(30);
     let timer = setInterval(() => {
@@ -66,25 +67,29 @@ function Signup() {
       return;
     }
     try {
-      await axios.post('http://localhost:5001/auth/verify/email', { email: signupData.email }, {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      await axios.post(
+        "http://localhost:5001/auth/verify/email",
+        { email: signupData.email },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       setOtpSent(true);
       setOtpVerified(false);
       setOtp("");
       alert("OTP sent! Check your email.");
       startResendTimeout();
-    } catch (error) {
+    } catch {
       alert("Could not send OTP. Try again.");
     }
   };
 
   const verifyOtp = async () => {
     try {
-      const res = await axios.post('http://localhost:5001/auth/verify/otp', {
-        email: signupData.email,
-        otp: otp,
-      });
+      const res = await axios.post(
+        "http://localhost:5001/auth/verify/otp",
+        { email: signupData.email, otp }
+      );
       if (res.status === 200) {
         setOtpVerified(true);
         alert("OTP verification successful.");
@@ -113,126 +118,144 @@ function Signup() {
       } else {
         alert("Failed to signup, please try again.");
       }
-    } catch (error) {
+    } catch {
       alert("Failed to signup. Email already exists or unforeseen error.");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-emerald-50 px-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-md">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Join CarpoolConnect</h2>
-          <button onClick={() => navigate("/")} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-emerald-100 via-white to-green-100 px-0">
+      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-xl mx-4 p-12 flex flex-col">
+        {/* Top Bar */}
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-4xl font-extrabold text-emerald-700 flex gap-2 items-center">
+            <span role="img" aria-label="wheel">🛞</span> Join CarpoolConnect
+          </h2>
+          <button
+            onClick={() => navigate("/")}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X size={28} />
           </button>
         </div>
-
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Guidance */}
+        <div className="w-full bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-8 text-base shadow">
+          <strong>Safety Notice:</strong> Please provide a valid and accessible <span className="font-semibold">Emergency Email</span>. This address may be used to contact you or your emergency contact during emergencies or account recovery.
+        </div>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <input
               type="text"
               value={signupData.firstName}
               onChange={(e) => handleSignupChange("firstName", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               placeholder="First Name"
             />
             <input
               type="text"
               value={signupData.lastName}
               onChange={(e) => handleSignupChange("lastName", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               placeholder="Last Name"
             />
-          </div>
-          <div>
             <input
-              type="email"
-              value={signupData.email}
-              onChange={(e) => handleSignupChange("email", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-              placeholder="Email"
+              type="tel"
+              value={signupData.phoneNumber}
+              onChange={(e) => handleSignupChange("phoneNumber", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+              placeholder="Phone Number"
             />
-            <div className="flex items-center gap-2 mt-2">
-              <button
-                type="button"
-                onClick={sendOtp}
-                className="bg-emerald-500 text-white px-4 py-2 rounded disabled:opacity-60"
-                disabled={!signupData.email || (otpSent && resendTimeout > 0)}
-              >
-                {otpSent && resendTimeout > 0
-                  ? `Resend OTP (${resendTimeout}s)`
-                  : otpSent
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <input
+                type="email"
+                value={signupData.email}
+                onChange={(e) => handleSignupChange("email", e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                placeholder="Email"
+              />
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={sendOtp}
+                  className="bg-emerald-500 text-white px-4 py-2 rounded disabled:opacity-60"
+                  disabled={!signupData.email || (otpSent && resendTimeout > 0)}
+                >
+                  {otpSent && resendTimeout > 0
+                    ? `Resend OTP (${resendTimeout}s)`
+                    : otpSent
                     ? "Resend OTP"
                     : "Send OTP"}
-              </button>
-              {otpSent && (!otpVerified) && (
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mt-1">
-                    <input
-                      type="text"
-                      value={otp}
-                      maxLength={6}
-                      onChange={e => setOtp(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg w-36"
-                      placeholder="Enter OTP"
-                    />
-                    <button
-                      type="button"
-                      onClick={verifyOtp}
-                      className="bg-emerald-600 text-white px-4 py-2 rounded"
-                    >
-                      Verify OTP
-                    </button>
+                </button>
+                {otpSent && !otpVerified && (
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mt-1">
+                      <input
+                        type="text"
+                        value={otp}
+                        maxLength={6}
+                        onChange={e => setOtp(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg w-36"
+                        placeholder="Enter OTP"
+                      />
+                      <button
+                        type="button"
+                        onClick={verifyOtp}
+                        className="bg-emerald-600 text-white px-4 py-2 rounded"
+                      >
+                        Verify OTP
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-              {otpVerified && (
-                <span className="text-green-600 font-medium ml-2">✔ Verified</span>
-              )}
+                )}
+                {otpVerified && (
+                  <span className="text-green-600 font-medium ml-2">
+                    ✔ Verified
+                  </span>
+                )}
+              </div>
             </div>
+            <input
+              type="email"
+              value={signupData.emergencyEmail || ""}
+              onChange={e => handleSignupChange("emergencyEmail", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+              placeholder="Emergency Email (for notifications in critical situations)"
+              required
+            />
           </div>
-          <input
-            type="tel"
-            value={signupData.phoneNumber}
-            onChange={(e) => handleSignupChange("phoneNumber", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-            placeholder="Phone Number"
-          />
-          <input
-            type="password"
-            value={signupData.password}
-            onChange={(e) => handleSignupChange("password", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-            placeholder="Password"
-          />
-          <select
-            value={signupData.role}
-            onChange={(e) => handleSignupChange("role", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-          >
-            <option value="">Select Role</option>
-            <option value="RIDER">Rider</option>
-            <option value="DRIVER">Driver</option>
-          </select>
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Preferences</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {["genderBased"].map((genderBased) => (
-                <select
-                  key={genderBased}
-                  value={signupData.preferences[genderBased]}
-                  onChange={(e) =>
-                    handleSignupChange(`preferences.${genderBased}`, e.target.value)
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">{`Gender Based`}</option>
-                  <option value="MALE_ONLY">Male</option>
-                  <option value="FEMALE_ONLY">Female</option>
-                  <option value="NONE">None</option>
-                </select>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input
+              type="password"
+              value={signupData.password}
+              onChange={(e) => handleSignupChange("password", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+              placeholder="Password"
+            />
+            <select
+              value={signupData.role}
+              onChange={(e) => handleSignupChange("role", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+            >
+              <option value="">Select Role</option>
+              <option value="RIDER">Rider</option>
+              <option value="DRIVER">Driver</option>
+            </select>
+          </div>
+          <div className="border-t pt-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">Preferences</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <select
+                value={signupData.preferences.genderBased}
+                onChange={(e) => handleSignupChange("preferences.genderBased", e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">Gender Based</option>
+                <option value="MALE_ONLY">Male</option>
+                <option value="FEMALE_ONLY">Female</option>
+                <option value="NONE">None</option>
+              </select>
               {["music", "smoking", "petFriendly", "ac"].map((pref) => (
                 <select
                   key={pref}
@@ -250,37 +273,42 @@ function Signup() {
               ))}
             </div>
           </div>
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 rounded-lg mt-6"
-            disabled={!otpVerified}
-          >
-            Create Account
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() =>
-              window.location.href =
-                "https://accounts.google.com/o/oauth2/v2/auth?client_id=652720590250-tvni6g7q7d8go16tfduq3pre3m3mkveu.apps.googleusercontent.com&redirect_uri=http://localhost:5001/auth/google/callback&response_type=code&scope=openid%20email%20profile"
-            }
-            className="w-full bg-white text-gray-800 border border-gray-300 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100"
-          >
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              alt="Google"
-              className="h-5 w-5"
-            />
-            Sign up with Google
-          </button>
-          <p className="text-sm text-gray-600 mt-4">
-            Already have an account?{" "}
-            <button onClick={() => navigate("/login")} className="text-emerald-600 font-semibold">
-              Sign in
+          {/* BUTTONS: Create + Google side by side */}
+          <div className="flex flex-col sm:flex-row gap-4 mt-8">
+            <button
+              type="submit"
+              className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 rounded-lg text-xl font-bold hover:from-emerald-600 hover:to-emerald-700 transition"
+              disabled={!otpVerified}
+            >
+              Create Account
             </button>
-          </p>
+            <button
+              type="button"
+              onClick={() =>
+                window.location.href =
+                  "https://accounts.google.com/o/oauth2/v2/auth?client_id=652720590250-tvni6g7q7d8go16tfduq3pre3m3mkveu.apps.googleusercontent.com&redirect_uri=http://localhost:5001/auth/google/callback&response_type=code&scope=openid%20email%20profile"
+              }
+              className="flex-1 flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 py-3 rounded-lg shadow-sm hover:bg-gray-100 text-xl"
+              style={{ minWidth: 0 }}
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="h-5 w-5"
+              />
+              Sign up with Google
+            </button>
+          </div>
+        </form>
+        <div className="text-base text-gray-600 text-center mt-6">
+          Already have an account?{" "}
+          <button
+            onClick={() => navigate("/login")}
+            className="text-emerald-600 font-semibold"
+            type="button"
+          >
+            Sign in
+          </button>
         </div>
       </div>
     </div>

@@ -72,7 +72,7 @@ function DashboardAdmin() {
         </button>
         <div className="flex items-center gap-4">
           <UserCircle
-            onClick={() => navigate("/admin/profile")}
+            onClick={() => navigate("/profile")}
             className="text-gray-600 cursor-pointer hover:text-emerald-600"
           />
           <button

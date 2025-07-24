@@ -50,6 +50,11 @@ function DriverRides() {
     }
   };
 
+  function truncateLabel(label) {
+    return label && label.length > 40 ? label.slice(0, 37) + "..." : label;
+  }
+
+
   const rides = ridesPage?.content || [];
   const totalPages = ridesPage?.totalPages || 1;
 
@@ -67,79 +72,72 @@ function DriverRides() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {rides.map(({ id, ride }) => {
-              const from = ride.route[0]?.location?.label || "Start";
-              const to = ride.route[ride.route.length - 1]?.location?.label || "End";
-              return (
-                <div
-                  key={id}
-                  className="bg-white border border-emerald-100 shadow hover:shadow-lg rounded-2xl p-6 transition-transform hover:scale-[1.01] cursor-pointer relative"
-                  onClick={() => navigate(`/ride-details/${id}`)}
-                >
-                  <div className="absolute top-3 right-3">
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        setConfirmDeleteId(id);
-                      }}
-                      title="Delete Ride"
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      {from} <span className="text-emerald-600">➝</span> {to}
-                    </h3>
-                    <div className="text-sm text-gray-500">
-                      <p>
-                        Seats:{" "}
-                        <span className="font-medium text-gray-700">
-                          {ride.availableSeats} / {ride.seatCapacity}
-                        </span>
-                      </p>
-                      <p>
-                        Status:
-                        <span
-                          className={`ml-2 font-semibold ${
-                            ride.status === "ACTIVE"
-                              ? "text-green-600"
-                              : ride.status === "INACTIVE"
-                              ? "text-gray-500"
-                              : "text-yellow-600"
-                          }`}
-                        >
-                          {ride.status}
-                        </span>
-                      </p>
-                    </div>
-                    <div className="mt-4 flex flex-row justify-end gap-3">
-                      {ride.status=="OPEN" && (<button
-                        onClick={e => {
-                          e.stopPropagation();
-                          navigate(`/create/${id}`);
-                        }}
-                        className="text-sm font-medium text-blue-600 hover:underline"
-                        title="Update this ride"
-                      >
-                        Update
-                      </button>)}
+                const from = truncateLabel(ride.route[0]?.location?.label || "Start");
+                const to = truncateLabel(ride.route[ride.route.length - 1]?.location?.label || "End");
+                return (
+                  <div
+                    key={id}
+                    className="bg-gradient-to-br from-white to-emerald-50 border-2 border-emerald-200 hover:border-emerald-400 p-5 rounded-2xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 cursor-pointer relative group"
+                    onClick={() => navigate(`/ride-details/${id}`)}
+                  >
+                    {/* Action Buttons */}
+                    <div className="absolute top-3 right-4 flex gap-2">
                       <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          navigate(`/ride-details/${id}`);
-                        }}
-                        className="text-sm font-medium text-emerald-600 hover:underline"
-                        title="View ride details"
+                        onClick={e => {e.stopPropagation(); setConfirmDeleteId(id);}}
+                        className="text-white bg-red-600 hover:bg-red-700 rounded-full p-1 shadow transition-colors"
+                        title="Delete Ride"
                       >
-                        View Details →
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-
+                    <div className="flex items-center gap-4 mb-3">
+                      <span className="rounded-full bg-emerald-100 p-2">
+                        <span role="img" aria-label="car" className="text-emerald-600">🚗</span>
+                      </span>
+                      <h3 className="text-xl font-bold text-emerald-700 tracking-tight flex-1">
+                        {from}
+                        <span className="mx-2 text-emerald-500 font-extrabold text-2xl align-middle">➝</span>
+                        {to}
+                      </h3>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-gray-500 border-b pb-2 mb-2">
+                      <div>
+                        <span className="font-semibold text-gray-800">{ride.availableSeats}/{ride.seatCapacity}</span>
+                        <span className="ml-1">seats</span>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold
+                        ${
+                          ride.status === "ACTIVE" ? "bg-green-100 text-green-700" :
+                          ride.status === "INACTIVE" || ride.status==="CANCELLED" ? "bg-gray-100 text-gray-600" :
+                          "bg-yellow-100 text-yellow-700"
+                        }`
+                      }>
+                        {ride.status}
+                      </span>
+                    </div>
+                    {/* Ride meta or notes (optional) */}
+                    <div className="flex justify-end gap-3 pt-3">
+                      {ride.status === "OPEN" && (
+                        <button
+                          onClick={e => {e.stopPropagation(); navigate(`/create/${id}`);}}
+                          className="rounded px-3 py-1 text-blue-600 hover:text-white border border-blue-200 hover:bg-blue-600 transition"
+                          title="Update this ride"
+                        >
+                          Update
+                        </button>
+                      )}
+                      <button
+                        onClick={e => {e.stopPropagation(); navigate(`/ride-details/${id}`);}}
+                        className="rounded px-3 py-1 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition"
+                        title="View ride details"
+                      >
+                        View
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+
           </div>
 
           {/* Pagination Controls */}

@@ -23,6 +23,7 @@ const RideCreate = () => {
     ac: "NONE",
   });
   const [loading, setLoading] = useState(false);
+  const [city, setCity] = useState("");
 
   // Pre-fill fields if updating
   useEffect(() => {
@@ -70,6 +71,7 @@ const RideCreate = () => {
       vehicle,
       preferences,
       version,
+      city,
     };
 
     try {
@@ -91,6 +93,7 @@ const RideCreate = () => {
           }
         }
       } else {
+        console.log(requestBody);
         await axios.post(RIDE_URL, requestBody, {
           headers: { Authorization: `Bearer ${token}` },
         });
