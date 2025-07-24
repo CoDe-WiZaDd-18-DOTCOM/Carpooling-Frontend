@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { RIDE_URL } from "../utils/apis";
 import LocationSearchInput from "./LocationSearchInput";
 import { Route } from "lucide-react";
+import { GET_RIDE_URL } from "../utils/apis";
 
 const RideCreate = () => {
   const { rideId } = useParams();
@@ -30,7 +30,7 @@ const RideCreate = () => {
     console.log(isUpdate);
     if (isUpdate) {
       setLoading(true);
-      axios.get(`${RIDE_URL}/ride/${rideId}`, {
+      axios.get(`${GET_RIDE_URL}/${rideId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
       })
       .then(res => {
@@ -80,7 +80,7 @@ const RideCreate = () => {
       if (isUpdate) {
         try {
           console.log(requestBody);
-          const res=await axios.put(`${RIDE_URL}/${rideId}`, requestBody, {
+          const res=await axios.put(`${RIDES_URL}/${rideId}`, requestBody, {
             headers: { Authorization: `Bearer ${token}` },
           });
           alert("✅ Ride updated successfully!");
@@ -94,7 +94,7 @@ const RideCreate = () => {
         }
       } else {
         console.log(requestBody);
-        await axios.post(RIDE_URL, requestBody, {
+        await axios.post(RIDES_URL, requestBody, {
           headers: { Authorization: `Bearer ${token}` },
         });
         alert("✅ Ride created successfully!");

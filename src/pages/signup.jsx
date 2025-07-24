@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
-import { SIGNUP_URL } from "../utils/apis";
+import { GOOGLE_URL, SIGNUP_URL, VERIFY_EMAIL, VERIFY_OTP } from "../utils/apis";
 import axios from "axios";
 
 function Signup() {
@@ -68,7 +68,7 @@ function Signup() {
     }
     try {
       await axios.post(
-        "http://localhost:5001/auth/verify/email",
+        VERIFY_EMAIL,
         { email: signupData.email },
         {
           headers: { "Content-Type": "application/json" },
@@ -87,7 +87,7 @@ function Signup() {
   const verifyOtp = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5001/auth/verify/otp",
+        VERIFY_OTP,
         { email: signupData.email, otp }
       );
       if (res.status === 200) {
@@ -286,7 +286,7 @@ function Signup() {
               type="button"
               onClick={() =>
                 window.location.href =
-                  "https://accounts.google.com/o/oauth2/v2/auth?client_id=652720590250-tvni6g7q7d8go16tfduq3pre3m3mkveu.apps.googleusercontent.com&redirect_uri=http://localhost:5001/auth/google/callback&response_type=code&scope=openid%20email%20profile"
+                  `https://accounts.google.com/o/oauth2/v2/auth?client_id=652720590250-tvni6g7q7d8go16tfduq3pre3m3mkveu.apps.googleusercontent.com&redirect_uri=${GOOGLE_URL}&response_type=code&scope=openid%20email%20profile`
               }
               className="flex-1 flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 py-3 rounded-lg shadow-sm hover:bg-gray-100 text-xl"
               style={{ minWidth: 0 }}

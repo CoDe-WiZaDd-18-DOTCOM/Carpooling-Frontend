@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { BOOKING_URL, GET_DRIVER_BOOKING } from "../utils/apis";
 
 function IncomingRequests() {
   const [requests, setRequests] = useState([]);
@@ -8,7 +9,7 @@ function IncomingRequests() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/bookings/incoming", {
+        const res = await axios.get(GET_DRIVER_BOOKING, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
           },
@@ -26,7 +27,7 @@ function IncomingRequests() {
 
   const handleApprove = async (bookingId) => {
     try {
-      await axios.post(`http://localhost:5001/bookings/${bookingId}/approve`, {}, {
+      await axios.post(`${BOOKING_URL}/${bookingId}/approve`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },

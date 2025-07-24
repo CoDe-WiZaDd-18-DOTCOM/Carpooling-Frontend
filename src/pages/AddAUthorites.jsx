@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import LocationSearchInput from "./LocationSearchInput";
+import { ADD_AUTHORITY, EDIT_AUTHORITY,GET_AUTHORITY } from "../utils/apis";
 
 function AddAuthorities() {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -22,7 +23,7 @@ function AddAuthorities() {
         email,
       });
       const res = await axios.post(
-        "http://localhost:5001/sos/authority",
+        ADD_AUTHORITY,
         {
           label: selectedLocation.label,
           email,
@@ -58,7 +59,7 @@ function AddAuthorities() {
         email,
       });
       const res = await axios.put(
-        `http://localhost:5001/sos/authority/${prevLabel}`,
+        `${EDIT_AUTHORITY}/${prevLabel}`,
         {
           label: selectedLocation.label,
           email,
@@ -89,7 +90,7 @@ function AddAuthorities() {
     try {
       const label = selectedLocation.label; // store before it changes
       const res = await axios.get(
-        `http://localhost:5001/sos/authority/${label}`,
+        `${GET_AUTHORITY}/${label}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,

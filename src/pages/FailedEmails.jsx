@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Trash2, MailCheck } from "lucide-react";
+import { DELETE_EMAILS, GET_EMAILS } from "../utils/apis";
 
 function FailedEmailsAdmin() {
   const [emails, setEmails] = useState([]);
@@ -9,7 +10,7 @@ function FailedEmailsAdmin() {
   const fetchEmails = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5001/failed-emails", {
+      const res = await axios.get(GET_EMAILS, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
       },
@@ -30,7 +31,7 @@ function FailedEmailsAdmin() {
   if (!confirmDelete) return;
 
   try {
-    const res = await axios.delete(`http://localhost:5001/failed-emails/${id}`, {
+    const res = await axios.delete(`${DELETE_EMAILS}/${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
       },

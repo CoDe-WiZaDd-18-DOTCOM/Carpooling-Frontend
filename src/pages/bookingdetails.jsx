@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { CHECK_REVIEW, GET_BOOKING, SEND_SOS, SHARE_LOCATION, SUBMIT_REVIEW } from "../utils/apis";
 
 function BookingDetails() {
   const { id } = useParams();
@@ -19,7 +20,7 @@ function BookingDetails() {
 
   const fetchBookingDetails = async () => {
     try {
-      const res = await axios.get(`http://localhost:5001/bookings/booking/${id}`, {
+      const res = await axios.get(`${GET_BOOKING}/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
@@ -33,7 +34,7 @@ function BookingDetails() {
   const fetchReviewStatus = async () => {
   try {
     const res = await axios.post(
-      "http://localhost:5001/reviews/check",
+      CHECK_REVIEW,
       id, 
       {
         headers: {
@@ -65,7 +66,7 @@ function BookingDetails() {
 
   try {
     const res = await axios.post(
-      "http://localhost:5001/reviews/submit",
+      SUBMIT_REVIEW,
       {
         // reviewerEmail: localStorage.getItem("email"),
         revieweeEmail: driver.email,
@@ -116,7 +117,7 @@ function BookingDetails() {
   const handleSendSos = async () => {
   try {
     const res = await axios.post(
-      `http://localhost:5001/sos/alert/${id}`,
+      `${SEND_SOS}/${id}`,
       sosMessage,
       {
         headers: {
@@ -140,7 +141,7 @@ function BookingDetails() {
     }
 
     try {
-      await axios.post(`http://localhost:5001/share-location/${id}`, locationText, {
+      await axios.post(`${SHARE_LOCATION}/${id}`, locationText, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
           "Content-Type": "text/plain"

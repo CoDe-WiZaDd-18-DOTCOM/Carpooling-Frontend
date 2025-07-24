@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Car, Clock, MapPin, Users, ShieldCheck } from "lucide-react";
+import { BOOKING_URL, CLOSE_RIDE_URL, GET_RIDE_BOOKING, GET_RIDE_URL, SUBMIT_REVIEW } from "../utils/apis";
 
 function RideDetails() {
   const { id } = useParams();
@@ -17,12 +18,12 @@ function RideDetails() {
       try {
         const token = localStorage.getItem("AuthToken");
 
-        const rideRes = await axios.get(`http://localhost:5001/rides/ride/${id}`, {
+        const rideRes = await axios.get(`${GET_RIDE_URL}/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setRide(rideRes.data);
 
-        const bookingsRes = await axios.get(`http://localhost:5001/bookings/booking/by-ride/${id}`, {
+        const bookingsRes = await axios.get(`${GET_RIDE_BOOKING}/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBookings(bookingsRes.data);
@@ -64,7 +65,7 @@ function RideDetails() {
         const { rating, comment } = riderReviews[email];
         if (comment.trim() || rating !== 5) {
           await axios.post(
-            "http://localhost:5001/reviews/submit",
+            SUBMIT_REVIEW,
             {
               revieweeEmail: email,
               rating,
@@ -80,7 +81,7 @@ function RideDetails() {
       }
 
       const rideRes = await axios.post(
-        `http://localhost:5001/rides/close-ride/${id}`,
+        `${CLOSE_RIDE_URL}/${id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -101,7 +102,7 @@ function RideDetails() {
   const handleApprove = async (bookingId) => {
     try {
       setApprovingId(bookingId);
-      await axios.post(`http://localhost:5001/bookings/${bookingId}/approve`, {}, {
+      await axios.post(`${BOOKING_URL}/${bookingId}/approve`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },

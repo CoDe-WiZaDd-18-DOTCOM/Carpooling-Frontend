@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Search } from "lucide-react";
 import LocationSearchInput from "./LocationSearchInput";
+import { BOOKING_URL, SEACRH_RIDE_URL } from "../utils/apis";
 
 function SearchRides() {
   const [searchData, setSearchData] = useState({
@@ -50,7 +51,7 @@ function SearchRides() {
 
 
       const response = await axios.post(
-        "http://localhost:5001/rides/search",
+        SEACRH_RIDE_URL,
         {
           pickup: searchData.pickup,
           drop: searchData.drop,
@@ -73,7 +74,7 @@ function SearchRides() {
   const handleRequestRide = async (rideId) => {
     try {
       await axios.post(
-        `http://localhost:5001/bookings/${rideId}/create-request`,
+        `${BOOKING_URL}/${rideId}/create-request`,
         searchData,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },

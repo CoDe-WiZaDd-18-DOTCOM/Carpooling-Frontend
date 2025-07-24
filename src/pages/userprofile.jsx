@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { EDIT_URL, GET_PROFILE, UPLOAD_PIC } from "../utils/apis";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
@@ -11,7 +12,7 @@ function UserProfile() {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/users/me", {
+      const res = await axios.get(GET_PROFILE, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
@@ -27,24 +28,6 @@ function UserProfile() {
     }
   };
 
-  const fetchAverageRating = async (email) => {
-    try {
-      const res = await axios.post(
-        "http://localhost:5001/reviews/average-rating",
-        {email},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log(res.data);
-      setAverageRating(res.data);
-    } catch (err) {
-      console.error("Error fetching average rating", err);
-    }
-  };
 
   const handleChange = (field, value) => {
     setForm({ ...form, [field]: value });
@@ -62,7 +45,7 @@ function UserProfile() {
 
   const handleSave = async () => {
     try {
-      await axios.put("http://localhost:5001/users/me", form, {
+      await axios.put(EDIT_URL, form, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
@@ -71,7 +54,7 @@ function UserProfile() {
       if (selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
-        await axios.post("http://localhost:5001/users/upload-picture", formData, {
+        await axios.post(UPLOAD_PIC, formData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
             "Content-Type": "multipart/form-data",

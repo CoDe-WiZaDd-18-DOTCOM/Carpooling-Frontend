@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { CLOSE_SOS, GET_SOS } from "../utils/apis";
 
 function SosAlerts() {
   const [alerts, setAlerts] = useState([]);
@@ -9,7 +10,7 @@ function SosAlerts() {
 
   const fetchAlerts = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/sos/alerts", {
+      const res = await axios.get(GET_SOS, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAlerts(res.data);
@@ -22,7 +23,7 @@ function SosAlerts() {
 
   const markAsResolved = async (id) => {
     try {
-      await axios.post(`http://localhost:5001/sos/close/${id}`, {}, {
+      await axios.post(`${CLOSE_SOS}/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("SOS alert marked as resolved.");

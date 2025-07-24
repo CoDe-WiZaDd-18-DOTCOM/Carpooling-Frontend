@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
+import { VERIFY_TOKEN } from "../utils/apis";
+import axios from "axios";
 
 function Landing() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,9 +23,26 @@ function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("AuthToken");
-    setIsLoggedIn(!!token);
+    const verifyToken = async () => {
+      const token = localStorage.getItem("AuthToken");
+      setIsLoggedIn(!!token);
+
+      if (token) {
+        try {
+          const res = await axios.post(VERIFY_TOKEN, { token });
+          if (res.status === 200) {
+            setIsLoggedIn(true);
+          }
+        } catch (error) {
+          console.error("Token verification failed:", error);
+          setIsLoggedIn(false);
+        }
+      }
+    };
+
+    verifyToken();
   }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("AuthToken");

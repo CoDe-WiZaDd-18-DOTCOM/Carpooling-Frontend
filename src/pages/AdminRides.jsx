@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Loader, Trash2 } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { DELETE_RIDE_URL, RIDES_URL } from "../utils/apis";
 
 function AdminRides() {
   const [rides, setRides] = useState([]);
@@ -18,7 +19,7 @@ function AdminRides() {
   useEffect(() => {
     const fetchRides = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/rides", {
+        const res = await axios.get(RIDES_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setRides(res.data);
@@ -62,7 +63,7 @@ function AdminRides() {
   const deleteRide = async (id) => {
     if (!window.confirm("Are you sure you want to delete this ride?")) return;
     try {
-      await axios.delete(`http://localhost:5001/rides/delete/${id}`, {
+      await axios.delete(`${DELETE_RIDE_URL}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRides(rides.filter((r) => r.id !== id));

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search, UserMinus, ArrowUpRight, Loader, ShieldCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { DELETE_BANNED_USER, GET_BANNED_USERS_URL, GET_USER_LIST, POST_BANNED_USER, PROMOTE_USER } from "../utils/apis";
 
 function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -26,10 +27,10 @@ function AdminUsers() {
       setLoading(true);
       try {
         const [usersRes, bannedRes] = await Promise.all([
-          axios.get(`http://localhost:5001/users/user-list?page=${page}&size=${size}`, {
+          axios.get(`${GET_USER_LIST}?page=${page}&size=${size}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5001/ban/all", {
+          axios.get(GET_BANNED_USERS_URL, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -62,7 +63,7 @@ function AdminUsers() {
   const promoteToAdmin = async (email) => {
     try {
       await axios.post(
-        `http://localhost:5001/users/user/${email}`,
+        `${PROMOTE_USER}/${email}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -75,7 +76,7 @@ function AdminUsers() {
   const handleBan = async () => {
     try {
       await axios.post(
-        `http://localhost:5001/ban/user`,
+        POST_BANNED_USER,
         {
           email: banModal.email,
           reason: banReason,
@@ -99,7 +100,7 @@ function AdminUsers() {
 
   const unbanUser = async (email) => {
     try {
-      await axios.delete(`http://localhost:5001/ban/user/${email}`, {
+      await axios.delete(`${DELETE_BANNED_USER}/${email}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("User unbanned successfully.");

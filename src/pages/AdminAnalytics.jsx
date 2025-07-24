@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Loader } from "lucide-react";
+import { ANALYTICS_URL } from "../utils/apis";
 
 const COLORS = ["#34D399", "#60A5FA", "#FBBF24", "#F87171", "#A78BFA"];
 
@@ -16,7 +17,7 @@ function AdminAnalytics() {
     const fetchAnalytics = async () => {
       try {
         console.log("called")
-        const res = await axios.get("http://localhost:5001/analytics", {
+        const res = await axios.get(ANALYTICS_URL, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

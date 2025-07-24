@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { CHATBOT_POST } from "../utils/apis";
 
 // ChatBotModal Component
 function ChatBotModal({ open, onClose }) {
@@ -21,7 +22,7 @@ function ChatBotModal({ open, onClose }) {
     setMessages((msg) => [...msg, userMessage]);
 
     try {
-      const response = await fetch("http://localhost:5001/public/chat-bot", {
+      const response = await fetch(CHATBOT_POST, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: input,

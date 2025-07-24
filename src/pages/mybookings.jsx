@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Trash2, X, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { DELETE_BOOKING, GET_USER_BOOKING } from "../utils/apis";
 
 
 function MyBookings() {
@@ -18,7 +19,7 @@ function MyBookings() {
   const fetchMyBookings = async (currPage = page) => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5001/bookings/me", {
+      const res = await axios.get(GET_USER_BOOKING, {
         params: { page: currPage, size: PAGE_SIZE },
         headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
       });
@@ -44,7 +45,7 @@ function MyBookings() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/bookings/delete/${id}`, {
+      await axios.delete(`${DELETE_BOOKING}/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("AuthToken")}` },
       });
       fetchMyBookings(page);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Trash2, ChevronLeft , ChevronRight } from "lucide-react";
+import { DELETE_RIDE_URL, DRIVER_RIDES_URL } from "../utils/apis";
 
 const PAGE_SIZE = 4;
 
@@ -15,7 +16,7 @@ function DriverRides() {
   const fetchRides = async (currPage = page) => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5001/rides/me`, {
+      const res = await axios.get(DRIVER_RIDES_URL, {
         params: { page: currPage, size: PAGE_SIZE },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
@@ -36,7 +37,7 @@ function DriverRides() {
 
   const handleDelete = async (rideId) => {
     try {
-      await axios.delete(`http://localhost:5001/rides/delete/${rideId}`, {
+      await axios.delete(`${DELETE_RIDE_URL}/${rideId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
         },
