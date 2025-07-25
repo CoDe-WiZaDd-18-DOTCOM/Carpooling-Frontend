@@ -34,7 +34,7 @@ function Login() {
             localStorage.setItem("AuthToken",response.data.jwtToken);
             localStorage.setItem("role",response.data.role);
             if(response.data.role==="ADMIN") navigate("/admin");
-            else navigate("/Dashboard");
+            else navigate("/dashboard");
         }
         else if( response.status == 403) {
             notifications.show({    
