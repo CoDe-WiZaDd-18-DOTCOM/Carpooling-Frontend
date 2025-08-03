@@ -209,6 +209,10 @@ function Landing() {
               impact on the environment. Our smart carpooling system matches you
               with the perfect ride.
             </p>
+            <div className="mb-8 max-w-3xl mx-auto bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md text-sm text-left">
+  <strong>Note:</strong> This project is hosted on a free Render server. The first request may take <strong>30–40 seconds</strong> to load as the server spins up. Subsequent interactions will be faster.
+</div>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => {
