@@ -35,6 +35,7 @@ function Landing() {
           }
         } catch (error) {
           console.error("Token verification failed:", error);
+          localStorage.removeItem("AuthToken");
           setIsLoggedIn(false);
         }
       }
