@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
-import { GOOGLE_URL, SIGNUP_URL } from "../utils/apis";
+import { GOOGLE_URL, SIGNUP_URL, VERIFY_EMAIL, VERIFY_OTP } from "../utils/apis";
 import axios from "axios";
 
 function Signup() {
@@ -24,6 +24,25 @@ function Signup() {
     },
   });
 
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [resendTimeout, setResendTimeout] = useState(0);
+
+  // Helper: resend OTP cooldown
+  const startResendTimeout = () => {
+    setResendTimeout(30);
+    let timer = setInterval(() => {
+      setResendTimeout((t) => {
+        if (t <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+  };
+
   const handleSignupChange = (field, value) => {
     if (field.includes(".")) {
       const [parent, child] = field.split(".");
@@ -42,8 +61,52 @@ function Signup() {
     }
   };
 
+  const sendOtp = async () => {
+    if (!signupData.email) {
+      alert("Please enter your email to get OTP.");
+      return;
+    }
+    try {
+      await axios.post(
+        VERIFY_EMAIL,
+        { email: signupData.email },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      setOtpSent(true);
+      setOtpVerified(false);
+      setOtp("");
+      alert("OTP sent! Check your email.");
+      startResendTimeout();
+    } catch {
+      alert("Could not send OTP. Try again.");
+    }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      const res = await axios.post(
+        VERIFY_OTP,
+        { email: signupData.email, otp }
+      );
+      if (res.status === 200) {
+        setOtpVerified(true);
+        alert("OTP verification successful.");
+      } else {
+        throw new Error();
+      }
+    } catch {
+      alert("Invalid or expired OTP.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!otpVerified) {
+      alert("Please verify your OTP before signing up.");
+      return;
+    }
     try {
       const response = await axios.post(SIGNUP_URL, signupData);
       if (response.status === 200) {
@@ -87,7 +150,6 @@ function Signup() {
               onChange={(e) => handleSignupChange("firstName", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               placeholder="First Name"
-              required
             />
             <input
               type="text"
@@ -95,7 +157,6 @@ function Signup() {
               onChange={(e) => handleSignupChange("lastName", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               placeholder="Last Name"
-              required
             />
             <input
               type="tel"
@@ -103,18 +164,58 @@ function Signup() {
               onChange={(e) => handleSignupChange("phoneNumber", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               placeholder="Phone Number"
-              required
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              type="email"
-              value={signupData.email}
-              onChange={(e) => handleSignupChange("email", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
-              placeholder="Email"
-              required
-            />
+            <div>
+              <input
+                type="email"
+                value={signupData.email}
+                onChange={(e) => handleSignupChange("email", e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                placeholder="Email"
+              />
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={sendOtp}
+                  className="bg-emerald-500 text-white px-4 py-2 rounded disabled:opacity-60"
+                  disabled={!signupData.email || (otpSent && resendTimeout > 0)}
+                >
+                  {otpSent && resendTimeout > 0
+                    ? `Resend OTP (${resendTimeout}s)`
+                    : otpSent
+                    ? "Resend OTP"
+                    : "Send OTP"}
+                </button>
+                {otpSent && !otpVerified && (
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mt-1">
+                      <input
+                        type="text"
+                        value={otp}
+                        maxLength={6}
+                        onChange={e => setOtp(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg w-36"
+                        placeholder="Enter OTP"
+                      />
+                      <button
+                        type="button"
+                        onClick={verifyOtp}
+                        className="bg-emerald-600 text-white px-4 py-2 rounded"
+                      >
+                        Verify OTP
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {otpVerified && (
+                  <span className="text-green-600 font-medium ml-2">
+                    ✔ Verified
+                  </span>
+                )}
+              </div>
+            </div>
             <input
               type="email"
               value={signupData.emergencyEmail || ""}
@@ -131,13 +232,11 @@ function Signup() {
               onChange={(e) => handleSignupChange("password", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               placeholder="Password"
-              required
             />
             <select
               value={signupData.role}
               onChange={(e) => handleSignupChange("role", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
-              required
             >
               <option value="">Select Role</option>
               <option value="RIDER">Rider</option>
@@ -174,10 +273,12 @@ function Signup() {
               ))}
             </div>
           </div>
+          {/* BUTTONS: Create + Google side by side */}
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
             <button
               type="submit"
               className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 rounded-lg text-xl font-bold hover:from-emerald-600 hover:to-emerald-700 transition"
+              disabled={!otpVerified}
             >
               Create Account
             </button>
