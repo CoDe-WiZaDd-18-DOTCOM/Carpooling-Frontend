@@ -15,6 +15,7 @@ function IncomingRequests() {
           },
         });
         setRequests(res.data);
+        console.log(res.data);
       } catch (err) {
         console.error("Failed to fetch requests:", err);
       } finally {
@@ -34,12 +35,12 @@ function IncomingRequests() {
       });
       alert("✅ Request approved!");
       setRequests((prev) =>
-        prev.map((req) =>
-          req.id === bookingId
-            ? { ...req, bookingRequest: { ...req.bookingRequest, approved: true } }
-            : req
-        )
-      );
+      prev.map((req) =>
+        req.id === bookingId  
+          ? { ...req, approved: true }
+          : req
+      )
+    );
     } catch (err) {
       console.error("Error approving request:", err);
       alert("❌ Failed to approve the request.");
@@ -57,9 +58,9 @@ function IncomingRequests() {
         <div className="text-center text-gray-600">No incoming ride requests.</div>
       ) : (
         <div className="grid gap-6">
-          {requests.map(({ id, bookingRequest }) => (
+          {requests.map((bookingRequest) => (
             <div
-              key={id}
+              key={bookingRequest.id}
               className="bg-white shadow-lg hover:shadow-xl rounded-xl p-6 border-l-4 border-emerald-500 transition"
             >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -96,7 +97,7 @@ function IncomingRequests() {
                     </span>
                   ) : (
                     <button
-                      onClick={() => handleApprove(id)}
+                      onClick={() => handleApprove(bookingRequest.id)}
                       className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg text-sm transition"
                     >
                       Approve Request

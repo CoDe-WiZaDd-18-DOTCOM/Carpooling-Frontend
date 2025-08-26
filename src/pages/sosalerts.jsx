@@ -51,7 +51,7 @@ function SosAlerts() {
       ) : (
         <div className="space-y-6">
           {alerts.map((wrapper) => {
-            const alert = wrapper.sosAlerts;
+            const alert = wrapper;
             const booking = alert.bookingRequest;
             const rider = booking?.rider;
             const driver = booking?.driver;

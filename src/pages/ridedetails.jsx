@@ -37,7 +37,7 @@ function RideDetails() {
 
   const handleCloseRide = () => {
     const initialReviews = {};
-    bookings.forEach(({ bookingRequest }) => {
+    bookings.forEach((bookingRequest ) => {
       const email = bookingRequest.rider.email;
       initialReviews[email] = { rating: 5, comment: "" };
     });
@@ -202,8 +202,9 @@ function RideDetails() {
             <p className="text-gray-500">No booking requests yet.</p>
           ) : (
             <div className="grid gap-6">
-              {bookings.map(({ id: bookingId, bookingRequest }) => {
+              {bookings.map((bookingRequest) => {
                 const { rider, approved } = bookingRequest;
+                const bookingId = bookingRequest.id;
                 const status = approved ? "APPROVED" : "PENDING";
                 const statusColor = approved ? "text-green-600" : "text-yellow-600";
 
@@ -256,7 +257,7 @@ function RideDetails() {
       </h3>
 
       <div className="space-y-8">
-        {bookings.map(({ bookingRequest }) => {
+        {bookings.map((bookingRequest) => {
           const rider = bookingRequest.rider;
           const review = riderReviews[rider.email] || { rating: 5, comment: "" };
 

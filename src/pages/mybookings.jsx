@@ -84,8 +84,10 @@ function MyBookings() {
         <p className="text-center text-gray-500 text-lg">No ride requests sent yet.</p>
       ) : (
         <div className="grid gap-6">
-          {bookings.map(({ id, bookingRequest }) => {
+          {bookings.map((bookingRequest) => {
             const { driver, pickup, destination, approved } = bookingRequest;
+            const id = bookingRequest.id;
+            console.log(id);
 
 
             return (

@@ -15,6 +15,8 @@ function SearchRides() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [pickupCity, setPickupCity] = useState("");
+
 
   const updateLocation = (field, value) => {
     setSearchData((prev) => ({ ...prev, [field]: value }));
@@ -56,6 +58,7 @@ function SearchRides() {
           pickup: searchData.pickup,
           drop: searchData.drop,
           preferredRoute: searchData.preferredRoute.filter((stop) => stop !== null),
+          city: pickupCity
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -121,7 +124,10 @@ function SearchRides() {
           <div>
             <label className="block text-sm text-gray-700 mb-1">Pickup Location</label>
             <LocationSearchInput
-              onSelect={(loc) => updateLocation("pickup", loc)}
+              onSelect={(loc,city) => {
+                updateLocation("pickup", loc);
+                setPickupCity(city);
+              }}
               placeholder="Search pickup location..."
             />
           </div>
@@ -195,21 +201,21 @@ function SearchRides() {
               </thead>
               <tbody>
                 {sortedResults.map((ride) => (
-                  <tr key={ride.rideSearchDto.id} className="border-t hover:bg-gray-50">
+                  <tr key={ride.ride.id} className="border-t hover:bg-gray-50">
                     <td className="p-3 flex items-center gap-3">
-                      {ride.rideSearchDto.driver.profileImageBase64 && (
+                      {ride.ride.driver.profileImageBase64 && (
                         <img
-                          src={`data:image/jpeg;base64,${ride.rideSearchDto.driver.profileImageBase64}`}
+                          src={`data:image/jpeg;base64,${ride.ride.driver.profileImageBase64}`}
                           alt="Driver"
                           className="w-10 h-10 rounded-full object-cover border"
                         />
                       )}
                       <span>
-                        {ride.rideSearchDto.driver.firstName} {ride.rideSearchDto.driver.lastName}
+                        {ride.ride.driver.firstName} {ride.ride.driver.lastName}
                       </span>
                     </td>
                     <td className="p-3">
-                      {ride.rideSearchDto.vehicle.brand} {ride.rideSearchDto.vehicle.model}
+                      {ride.ride.vehicle.brand} {ride.ride.vehicle.model}
                     </td>
                     <td className="p-3">{ride.routeMatchResult.arrivalTime}</td>
                     <td className="p-3 font-semibold text-emerald-600">{Math.round(ride.routeMatchResult.score)}%</td>
@@ -225,7 +231,7 @@ function SearchRides() {
                       ) : (
                         <button
                           className="bg-emerald-500 text-white px-4 py-1 rounded-md hover:bg-emerald-600"
-                          onClick={() => handleRequestRide(ride.rideSearchDto.id)}
+                          onClick={() => handleRequestRide(ride.ride.id)}
                         >
                           Request Ride
                         </button>

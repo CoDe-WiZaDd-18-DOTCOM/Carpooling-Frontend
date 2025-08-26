@@ -23,6 +23,7 @@ function DriverRides() {
         },
       });
       setRidesPage(res.data);
+      console.log(res.data.content);
     } catch (err) {
       console.error("Failed to fetch driver rides:", err);
     } finally {
@@ -72,9 +73,10 @@ function DriverRides() {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {rides.map(({ id, ride }) => {
+            {rides.map((ride) => {
                 const from = truncateLabel(ride.route[0]?.location?.label || "Start");
                 const to = truncateLabel(ride.route[ride.route.length - 1]?.location?.label || "End");
+                const id=ride.id;
                 return (
                   <div
                     key={id}

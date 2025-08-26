@@ -24,6 +24,7 @@ function AdminRides() {
         });
         setRides(res.data);
         setFiltered(res.data);
+        console.log(res.data);
       } catch (err) {
         console.error("Error fetching rides", err);
       } finally {
@@ -35,25 +36,25 @@ function AdminRides() {
 
   useEffect(() => {
     let result = [...rides];
-    if (status) result = result.filter((r) => r.ride.status === status);
+    if (status) result = result.filter((r) => r.status === status);
     if (city)
       result = result.filter((r) =>
-        r.ride.route.some((stop) =>
+        r.route.some((stop) =>
           stop.location.label.toLowerCase().includes(city.toLowerCase())
         )
       );
     if (date)
       result = result.filter(
-        (r) => r.ride.createdAt.split("T")[0] === date
+        (r) => r.createdAt.split("T")[0] === date
       );
     if (driver)
       result = result.filter((r) =>
-        r.ride.driver.email.toLowerCase().includes(driver.toLowerCase())
+        r.driver.email.toLowerCase().includes(driver.toLowerCase())
       );
 
       result.sort((a, b) => {
-    const dateA = new Date(a.ride.createdAt);
-    const dateB = new Date(b.ride.createdAt);
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
     return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
   });
 
@@ -144,9 +145,9 @@ function AdminRides() {
                     className="border-t hover:bg-gray-50 cursor-pointer"
                     onClick={() => navigate(`/ride-details/${r.id}`)}
                   >
-                    <td className="px-4 py-2">{r.ride.driver.email}</td>
+                    <td className="px-4 py-2">{r.driver.email}</td>
                     <td className="px-4 py-2">
-                      {r.ride.route.map((stop, i) => (
+                      {r.route.map((stop, i) => (
                         <div key={i} className="mb-1">
                           <span className="font-medium">{stop.location.label}</span>
                           {" "}
@@ -157,15 +158,15 @@ function AdminRides() {
                       ))}
                     </td>
                     <td className="px-4 py-2">
-                      {r.ride.availableSeats} / {r.ride.seatCapacity}
+                      {r.availableSeats} / {r.seatCapacity}
                     </td>
-                    <td className="px-4 py-2">{r.ride.status}</td>
+                    <td className="px-4 py-2">{r.status}</td>
                     <td className="px-4 py-2">
-                      {new Date(r.ride.createdAt).toLocaleString()}
+                      {new Date(r.createdAt).toLocaleString()}
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex gap-2">
-                        {r.ride.status=="OPEN" && (<button
+                        {r.status=="OPEN" && (<button
                           onClick={e => {
                             e.stopPropagation();
                             navigate(`/create/${r.id}`);

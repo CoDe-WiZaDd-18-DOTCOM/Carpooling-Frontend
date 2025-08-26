@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import LocationSearchInput from "./LocationSearchInput";
 import { Route } from "lucide-react";
-import { GET_RIDE_URL } from "../utils/apis";
+import { GET_RIDE_URL,RIDES_URL } from "../utils/apis";
 
 const RideCreate = () => {
   const { rideId } = useParams();
@@ -101,6 +101,7 @@ const RideCreate = () => {
       }
       navigate("/driver-rides");
     } catch (err) {
+      console.log(err);
       alert(isUpdate ? "❌ Failed to update ride." : "❌ Failed to create ride.");
     } finally {
       setLoading(false);
@@ -163,7 +164,7 @@ const RideCreate = () => {
 
           {/* Seat Capacity */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Seats Available</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">Seats Capacity</h3>
             <input
               type="number"
               className="input-style w-24"
